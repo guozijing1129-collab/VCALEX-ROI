@@ -19,8 +19,17 @@ export const analyzeSimulation = async (
     - 当前人员编制: ${state.currentHeadcount} 人
     - 推算人工年人效: ${metrics.impliedEfficiency.toLocaleString()} 单/人/年 (基于当前${(state.baselineAiRate * 100).toFixed(0)}%自动化率)
     - 人工综合年薪: ¥${effectiveSalary.toLocaleString()} ${state.salaryAdjustment ? `(含 ${state.salaryAdjustment}% 薪资波动调整)` : ''}
-    - 目标AI独立解决率: ${(state.aiResolutionRate * 100).toFixed(1)}%
-    - 目标人效提升: ${state.aiEfficiencyBoost}倍 (Enhance)
+    
+    **AI能力模型:**
+    - 目标综合独立解决率 (Automate): ${(state.aiResolutionRate * 100).toFixed(1)}%
+      * 渠道结构: 语音 ${(state.volumeVoiceShare)}% / 文本 ${(100 - state.volumeVoiceShare)}%
+      * 语音智能体解决率: ${(state.automateVoiceRate * 100).toFixed(0)}%
+      * 文本智能体解决率: ${(state.automateTextRate * 100).toFixed(0)}%
+    - 目标人效提升 (Enhance): ${state.aiEfficiencyBoost.toFixed(2)}倍
+      * 智能填单: +${state.enhanceSmartFill}%
+      * 知识推荐: +${state.enhanceKnowledge}%
+      * 业务导航: +${state.enhanceNavigation}%
+      * 总结转移: +${state.enhanceSummary}%
     - AI系统年投入: ¥${state.aiSystemCost.toLocaleString()}
 
     **测算结果:**
@@ -34,8 +43,8 @@ export const analyzeSimulation = async (
     **分析要求:**
     请提供一份简洁、专业的执行摘要（150字以内），使用中文回答。
     1. **财务洞察**: 评价ROI回报水平与成本优化幅度。
-    2. **人效分析**: 点评从 ${metrics.traditionalStaff}人 优化至 ${metrics.aiModeStaff.toFixed(1)}人 的可行性与价值。
-    3. **决策建议**: 结合大促峰值或夜间场景的潜在价值，给出推进建议。
+    2. **能力分布**: 简评语音vs文本智能体在当前业务结构下的贡献差异。
+    3. **决策建议**: 针对配置给出一句话的落地建议。
     
     请直接输出分析段落，不要使用Markdown标题。
   `;

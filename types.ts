@@ -5,9 +5,20 @@ export interface SimulationState {
   avgSalary: number; // Annual salary per agent (RMB)
   salaryAdjustment: number; // Percentage adjustment for salary sensitivity (-30 to +30)
   baselineAiRate: number; // Existing automation rate (e.g., 0.6) corresponding to current headcount
-  aiResolutionRate: number; // Target % handled by AI (0-1)
+  aiResolutionRate: number; // Target % handled by AI (0-1) [Weighted Average]
   aiEfficiencyBoost: number; // Efficiency gain for humans using AI tools (e.g. 1.3x)
   aiSystemCost: number; // Annual cost of AI system
+  
+  // Automate Factors (Breakdown)
+  volumeVoiceShare: number; // Percentage of volume that is Voice (0-100)
+  automateVoiceRate: number; // Resolution rate for Voice (0-1)
+  automateTextRate: number; // Resolution rate for Text (0-1)
+
+  // Enhance Factors (Percentage points, e.g., 10 for 10%)
+  enhanceSmartFill: number; // Smart form filling
+  enhanceKnowledge: number; // Knowledge recommendation
+  enhanceNavigation: number; // SOP/Business Navigation
+  enhanceSummary: number; // Conversation Summary & Transfer
 }
 
 export interface SimulationMetrics {
