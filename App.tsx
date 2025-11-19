@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import ControlPanel from './components/ControlPanel';
@@ -6,18 +7,21 @@ import { SimulationState, SimulationMetrics, ScenarioType, ChartDataPoint } from
 import { analyzeSimulation } from './services/geminiService';
 
 const INITIAL_STATE: SimulationState = {
-  dailyVolume: 8000,
-  currentHeadcount: 80, // Baseline headcount from case study
+  dailyVolume: 20000, // Updated to 20k Total to match the 8k human volume @ 60% AI rate
+  currentHeadcount: 80, // Baseline headcount
   avgSalary: 100000, // RMB per year
-  aiResolutionRate: 0.86, // 86% based on case study
-  aiEfficiencyBoost: 1.3, // 30% boost
-  aiSystemCost: 500000, // Annual cost estimate
+  salaryAdjustment: 0, // 0% adjustment initially
+  baselineAiRate: 0.6, // Current automation rate
+  aiResolutionRate: 0.86, // Target automation rate
+  aiEfficiencyBoost: 1.3, // 1.0 + 0.3 boost
+  aiSystemCost: 500000, // Annual cost
 };
 
 const ROICalculationDetails: React.FC<{ metrics: SimulationMetrics, state: SimulationState }> = ({ metrics, state }) => {
   const [isOpen, setIsOpen] = useState(false);
   
   const formatCurrency = (val: number) => `¥${(val / 10000).toFixed(1)}万`;
+  const effectiveSalary = state.avgSalary * (1 + (state.salaryAdjustment || 0) / 100);
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg transition-all duration-300 mt-0 no-break">
@@ -27,9 +31,9 @@ const ROICalculationDetails: React.FC<{ metrics: SimulationMetrics, state: Simul
         >
             <span className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
-              计算公式详解
+              ROI测算关键公式与逻辑说明
             </span>
             <svg className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -37,52 +41,79 @@ const ROICalculationDetails: React.FC<{ metrics: SimulationMetrics, state: Simul
         </button>
         
         {isOpen && (
-            <div className="p-4 border-t border-slate-800 bg-slate-950/30 text-xs space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-5 border-t border-slate-800 bg-slate-950/50 text-xs space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
                
-               {/* Main Formula */}
-               <div className="bg-slate-900/50 p-3 rounded border border-emerald-900/30">
-                  <div className="text-emerald-400 font-mono text-center font-bold mb-1">
-                    成本优化率 = ( 节省金额 ÷ 传统模式总成本 ) × 100%
+               {/* Formula 1: Original Headcount */}
+               <div className="space-y-2">
+                  <h4 className="text-emerald-400 font-bold text-sm flex items-center gap-2">
+                    1. 原始人力需求计算公式
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-normal">Current / Traditional</span>
+                  </h4>
+                  <div className="bg-slate-900 p-3 rounded border border-slate-800 font-mono text-slate-300 text-[11px]">
+                    人力需求 = 总会话量 ÷ 人工人效
                   </div>
-                  <div className="flex justify-center items-center gap-2 text-[10px] text-slate-500 font-mono">
-                     <span>({formatCurrency(metrics.savings)}</span>
-                     <span>÷</span>
-                     <span>{formatCurrency(metrics.traditionalCost)})</span>
-                     <span>× 100% = {((metrics.savings / metrics.traditionalCost) * 100).toFixed(1)}%</span>
+                  <p className="text-slate-500 leading-relaxed pl-2 border-l-2 border-slate-800">
+                    用于估算现状或无机器人支持下的人力需求。本模型中，基于当前编制 
+                    <strong className="text-slate-300"> {state.currentHeadcount}人</strong> 与当前自动化率 
+                    <strong className="text-slate-300"> {(state.baselineAiRate * 100).toFixed(0)}%</strong> 
+                    反推得出人工人效为 <strong className="text-slate-300">{metrics.impliedEfficiency.toFixed(0)} 单/人/年</strong> (约{metrics.impliedCapacity.toFixed(0)}单/人/天)。
+                  </p>
+               </div>
+
+               {/* Formula 2: AI Mode Headcount */}
+               <div className="space-y-2">
+                  <h4 className="text-blue-400 font-bold text-sm flex items-center gap-2">
+                    2. AI上线后人力需求计算公式
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-normal">AI Mode</span>
+                  </h4>
+                  <div className="bg-slate-900 p-3 rounded border border-slate-800 font-mono text-slate-300 text-[11px]">
+                    人力需求 = 总会话量 × (1 - 机器人解决率) ÷ (人工人效 × (1 + 效率提升率))
+                  </div>
+                  <p className="text-slate-500 leading-relaxed pl-2 border-l-2 border-slate-800">
+                    计算部署AI后的实际所需人力。
+                    当前目标解决率 <strong className="text-slate-300">{(state.aiResolutionRate * 100).toFixed(1)}%</strong>，
+                    效率提升率 <strong className="text-slate-300">{((state.aiEfficiencyBoost - 1) * 100).toFixed(0)}%</strong>。
+                    <br/>
+                    计算结果：<strong className="text-white">{metrics.aiModeStaff.toFixed(1)} 人</strong>
+                  </p>
+               </div>
+
+               {/* Formula 3: Savings */}
+               <div className="space-y-2">
+                  <h4 className="text-purple-400 font-bold text-sm flex items-center gap-2">
+                    3. 人工成本节省计算公式
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-normal">Savings</span>
+                  </h4>
+                  <div className="bg-slate-900 p-3 rounded border border-slate-800 font-mono text-slate-300 text-[11px]">
+                    年度成本节省 = (总会话量 × 增量解决率 × 单单人工成本) - AI系统年成本
+                  </div>
+                  <p className="text-slate-500 leading-relaxed pl-2 border-l-2 border-slate-800">
+                    测算净节省费用。模型采用“当前成本 - AI模式总成本”计算，逻辑等同于公式。
+                    <br/>
+                    年度净节省：<strong className="text-emerald-400">{formatCurrency(metrics.savings)}</strong>
+                  </p>
+               </div>
+
+               {/* Formula 4: ROI */}
+               <div className="space-y-2">
+                  <h4 className="text-orange-400 font-bold text-sm flex items-center gap-2">
+                    4. 投资回报率 (ROI) 计算公式
+                  </h4>
+                  <div className="bg-slate-900 p-3 rounded border border-slate-800 font-mono text-slate-300 text-[11px]">
+                    ROI = (年度收益 - 年度投入成本) ÷ 年度投入成本 × 100%
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-2">
+                     <div className="bg-slate-800/50 p-2 rounded">
+                        <div className="text-[10px] text-slate-500 mb-1">年度净收益 (分子)</div>
+                        <div className="text-emerald-400 font-mono font-bold">{formatCurrency(metrics.savings)}</div>
+                     </div>
+                     <div className="bg-slate-800/50 p-2 rounded">
+                        <div className="text-[10px] text-slate-500 mb-1">年度投入成本 (分母)</div>
+                        <div className="text-rose-400 font-mono font-bold">{formatCurrency(state.aiSystemCost)}</div>
+                     </div>
                   </div>
                </div>
 
-               {/* Breakdown */}
-               <div className="space-y-3 relative">
-                  <div className="absolute left-2 top-2 bottom-2 w-0.5 bg-slate-800"></div>
-                  
-                  {/* Savings Item */}
-                  <div className="ml-6 relative">
-                     <div className="absolute -left-[17px] top-2 w-3 h-0.5 bg-slate-800"></div>
-                     <h4 className="text-emerald-400 font-bold mb-1">1. 节省金额 ({formatCurrency(metrics.savings)})</h4>
-                     <div className="bg-slate-800/50 p-2 rounded font-mono text-slate-400 text-[10px]">
-                        = 传统总成本 - AI模式总成本
-                     </div>
-                  </div>
-
-                  {/* Traditional Cost Item */}
-                  <div className="ml-6 relative">
-                     <div className="absolute -left-[17px] top-2 w-3 h-0.5 bg-slate-800"></div>
-                     <h4 className="text-rose-400 font-bold mb-1">2. 传统模式总成本 ({formatCurrency(metrics.traditionalCost)})</h4>
-                     <div className="bg-slate-800/50 p-2 rounded font-mono text-slate-400 text-[10px]">
-                        = 人员编制({state.currentHeadcount}人) × 综合年薪({formatCurrency(state.avgSalary)})
-                     </div>
-                  </div>
-
-                   {/* AI Cost Item */}
-                   <div className="ml-6 relative">
-                     <div className="absolute -left-[17px] top-2 w-3 h-0.5 bg-slate-800"></div>
-                     <h4 className="text-blue-400 font-bold mb-1">3. AI模式总成本 ({formatCurrency(metrics.aiModeCost)})</h4>
-                     <div className="bg-slate-800/50 p-2 rounded font-mono text-slate-400 text-[10px]">
-                        = (AI后编制({metrics.aiModeStaff.toFixed(1)}人) × 年薪) + AI项目投入({formatCurrency(state.aiSystemCost)})
-                     </div>
-                  </div>
-               </div>
             </div>
         )}
     </div>
@@ -100,65 +131,84 @@ const App: React.FC = () => {
     setScenario(newScenario);
     switch (newScenario) {
       case ScenarioType.DAILY:
-        // "基础日常 ~8,000 单/日, 80人"
+        // "基础日常 ~20,000 Total Volume (8000 Human Volume), 80人 @ 60% Baseline"
         setState(prev => ({ 
             ...prev, 
-            dailyVolume: 8000, 
+            dailyVolume: 20000, 
             currentHeadcount: 80,
-            aiResolutionRate: 0.86
+            baselineAiRate: 0.60,
+            aiResolutionRate: 0.86,
+            salaryAdjustment: 0
         }));
         break;
       case ScenarioType.PEAK:
-        // "大促峰值翻倍 ~16,000 单/日, 160人"
+        // "大促峰值翻倍 ~40,000 单/日, 160人 @ 60% Baseline"
         setState(prev => ({ 
             ...prev, 
-            dailyVolume: 16000, 
+            dailyVolume: 40000, 
             currentHeadcount: 160,
-            aiResolutionRate: 0.82 // Slightly lower resolution on complex peak queries
+            baselineAiRate: 0.60,
+            aiResolutionRate: 0.82, // Slightly lower resolution on complex peak queries
+            salaryAdjustment: 0
         })); 
         break;
       case ScenarioType.NIGHT:
-        // "夜间薄弱时段 ~1,000 单/夜, 5人"
+        // "夜间薄弱时段 ~2,500 单/夜, 5人"
         setState(prev => ({ 
             ...prev, 
-            dailyVolume: 1000, 
+            dailyVolume: 2500, 
             currentHeadcount: 5,
-            aiResolutionRate: 0.98 // High resolution for standard night queries
+            baselineAiRate: 0.60,
+            aiResolutionRate: 0.98, // High resolution for standard night queries
+            salaryAdjustment: 0
         })); 
         break;
     }
   };
 
-  // Calculate Metrics
+  // Calculate Metrics strictly following the provided formulas
   const metrics = useMemo<SimulationMetrics>(() => {
-    const { dailyVolume, currentHeadcount, avgSalary, aiResolutionRate, aiEfficiencyBoost, aiSystemCost } = state;
+    const { dailyVolume, currentHeadcount, avgSalary, salaryAdjustment, baselineAiRate, aiResolutionRate, aiEfficiencyBoost, aiSystemCost } = state;
     
-    // Traditional Calculation
-    // Baseline is the current headcount provided
-    const traditionalStaff = currentHeadcount; 
-    const traditionalCost = traditionalStaff * avgSalary; // Annual cost
+    // 0. Basic Constants
+    const annualVolume = dailyVolume * 365;
+    const effectiveSalary = avgSalary * (1 + (salaryAdjustment || 0) / 100);
 
-    // Implied capacity calculation for reference
-    const impliedCapacity = dailyVolume / (currentHeadcount || 1);
-
-    // AI Mode Calculation
-    // Formula: New Staff = (Baseline Staff * (1 - AI Rate)) / Efficiency Boost
-    // Explanation:
-    // 1. Workload remaining for humans = Total Volume * (1 - AI Rate)
-    // 2. New Human Capacity = Old Capacity * Boost
-    // 3. Staff = Workload / New Capacity 
-    //          = (Volume * (1 - Rate)) / ((Volume/OldStaff) * Boost)
-    //          = OldStaff * ((1 - Rate) / Boost)
+    // 1. Derive "Human Efficiency" (Annual) from Current State (Formula 1 Logic)
+    // Logic: Current Headcount handles the volume that is NOT automated by baseline AI.
+    // Current Manual Volume = AnnualVolume * (1 - baselineAiRate)
+    // Human Efficiency = Current Manual Volume / Current Headcount
+    const volumeHandledByHumansCurrent = annualVolume * (1 - baselineAiRate);
+    const humanEfficiency = currentHeadcount > 0 ? volumeHandledByHumansCurrent / currentHeadcount : 0;
     
-    const reductionFactor = (1 - aiResolutionRate) / aiEfficiencyBoost;
-    const aiModeStaff = Math.max(0, currentHeadcount * reductionFactor);
-    
-    // Total AI Mode Cost
-    const aiModeCost = (aiModeStaff * avgSalary) + aiSystemCost;
+    // 2. Traditional Mode (Baseline/Status Quo)
+    // We treat "Traditional" as the Current State for ROI comparison purposes
+    const traditionalStaff = currentHeadcount;
+    const traditionalCost = traditionalStaff * effectiveSalary;
 
+    // 3. AI Mode Headcount (Formula 2)
+    // Formula: Headcount = Total Volume * (1 - AI Rate) / (Human Efficiency * (1 + Efficiency Boost))
+    // Note: aiEfficiencyBoost in state is already (1 + Boost), e.g., 1.3
+    const aiModeStaff = (humanEfficiency > 0) 
+        ? (annualVolume * (1 - aiResolutionRate)) / (humanEfficiency * aiEfficiencyBoost)
+        : 0;
+
+    // 4. Costs & Savings (Formula 3 & 4 Logic)
+    const aiModeLaborCost = aiModeStaff * effectiveSalary;
+    const aiModeCost = aiModeLaborCost + aiSystemCost;
+
+    // Savings = Traditional (Current) - AI Mode
     const savings = traditionalCost - aiModeCost;
-    const roi = (savings / aiSystemCost) * 100;
-    const humanWorkloadReduction = dailyVolume * aiResolutionRate;
+    
+    // ROI = (Net Savings) / Investment * 100%
+    // Note: The prompt formula says (Benefit - Cost) / Cost. 
+    // Here Savings = (TradCost - NewLaborCost - SystemCost).
+    // Net Benefit = Savings. 
+    // So ROI = Savings / SystemCost * 100.
+    const roi = (savings / (aiSystemCost || 1)) * 100;
+
+    // Workload reduction (Volume shifted)
+    const humanWorkloadReduction = annualVolume * (aiResolutionRate - baselineAiRate);
 
     return {
       traditionalStaff,
@@ -169,7 +219,8 @@ const App: React.FC = () => {
       roi,
       yearsToBreakeven: aiSystemCost / (savings > 0 ? savings : 1),
       humanWorkloadReduction,
-      impliedCapacity
+      impliedCapacity: humanEfficiency / 365, // Convert back to daily for display if needed
+      impliedEfficiency: humanEfficiency,
     };
   }, [state]);
 
@@ -180,7 +231,7 @@ const App: React.FC = () => {
       data.push({
         name: `第${year}年`,
         Traditional: metrics.traditionalCost * year,
-        AIMode: metrics.aiModeCost * year + (year === 1 ? 100000 : 0), // Add 100k setup fee in Y1
+        AIMode: metrics.aiModeCost * year + (year === 1 ? 0 : 0), // Assuming setup is in annual cost or amortized
       });
     }
     return data;
@@ -188,8 +239,8 @@ const App: React.FC = () => {
 
   const staffingData: ChartDataPoint[] = useMemo(() => {
     return [
-      { name: '传统模式', value: metrics.traditionalStaff },
-      { name: 'AI模式', value: metrics.aiModeStaff },
+      { name: '现有编制', value: metrics.traditionalStaff },
+      { name: 'AI模式需求', value: metrics.aiModeStaff },
     ];
   }, [metrics]);
 
@@ -237,8 +288,8 @@ const App: React.FC = () => {
         
         <div className="flex items-center gap-4">
             <div className="hidden md:flex gap-6 text-xs font-mono text-slate-400 no-print">
-               <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 目标独立解决率: 86%</span>
-               <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> 人效提升目标: 1.3x</span>
+               <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 目标独立解决率: {(state.aiResolutionRate * 100).toFixed(0)}%</span>
+               <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> 人效提升目标: {state.aiEfficiencyBoost}x</span>
             </div>
             
             <button 
@@ -301,7 +352,7 @@ const App: React.FC = () => {
                   </span>
                   <span className="block text-emerald-400 text-sm mt-2 flex items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" /></svg>
-                    对比传统人工模式
+                    对比现有编制成本
                   </span>
                 </div>
               </div>
@@ -318,14 +369,14 @@ const App: React.FC = () => {
                     <span className="text-slate-400 text-sm">当前编制</span>
                     <div className="text-right">
                         <span className="text-2xl font-mono text-slate-200 print:text-slate-800">{metrics.traditionalStaff.toFixed(0)}</span>
-                        <span className="text-xs text-slate-500 block">人</span>
+                        <span className="text-xs text-slate-500 block">人 (基准)</span>
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-emerald-400 text-sm font-medium">AI引入后</span>
                     <div className="text-right">
                         <span className="text-3xl font-bold text-white print:text-slate-900">{metrics.aiModeStaff.toFixed(1)}</span>
-                        <span className="text-xs text-slate-500 block">人 (当量)</span>
+                        <span className="text-xs text-slate-500 block">人 (测算)</span>
                     </div>
                   </div>
                </div>

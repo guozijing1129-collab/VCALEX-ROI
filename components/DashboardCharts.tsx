@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   AreaChart,
@@ -12,22 +13,44 @@ import {
   BarChart,
   Bar,
   Legend,
+  Cell,
 } from 'recharts';
 import { SimulationMetrics, ChartDataPoint } from '../types';
+
+const formatTooltipValue = (value: number, name: string) => {
+  // Check if the metric is likely currency based on name
+  const isCurrency = name.includes('成本') || name.includes('费用') || name.includes('Cost') || name.includes('节省');
+
+  if (isCurrency) {
+    if (Math.abs(value) >= 1000000) {
+      return `¥${(value / 1000000).toFixed(2)}M`;
+    }
+    if (Math.abs(value) >= 10000) {
+      return `¥${(value / 10000).toFixed(1)}万`;
+    }
+    return `¥${value.toLocaleString()}`;
+  }
+
+  // For non-currency metrics (Volume, Staff)
+  if (Math.abs(value) >= 10000) {
+    return `${(value / 10000).toFixed(1)}万`;
+  }
+  return value.toLocaleString();
+};
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900 border border-slate-700 p-3 rounded shadow-xl text-xs">
+      <div className="bg-slate-900 border border-slate-700 p-3 rounded shadow-xl text-xs z-50">
         <p className="text-slate-300 mb-2 font-semibold">{label}</p>
         {payload.map((entry: any, index: number) => (
           <div key={index} className="flex items-center gap-2 mb-1">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
             <span className="text-slate-400">{entry.name}:</span>
             <span className="text-slate-100 font-mono">
-              {typeof entry.value === 'number' && entry.value > 1000 
-                ? `¥${(entry.value/10000).toFixed(1)}万` 
-                : entry.value.toLocaleString()}
+              {typeof entry.value === 'number' 
+                ? formatTooltipValue(entry.value, entry.name)
+                : entry.value}
             </span>
           </div>
         ))}
@@ -103,7 +126,7 @@ export const StaffingChart: React.FC<{ data: ChartDataPoint[] }> = ({ data }) =>
           <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1e293b' }} />
           <Bar name="所需坐席数" dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={30}>
             {data.map((entry: any, index: number) => (
-               <cell key={`cell-${index}`} fill={index === 0 ? '#3b82f6' : '#8b5cf6'} />
+               <Cell key={`cell-${index}`} fill={index === 0 ? '#3b82f6' : '#8b5cf6'} />
             ))}
           </Bar>
         </BarChart>

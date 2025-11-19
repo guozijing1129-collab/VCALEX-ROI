@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SimulationState, ScenarioType } from '../types';
 
@@ -16,7 +17,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 }) => {
   
   const formatCurrency = (val: number) => `¥${(val / 10000).toFixed(1)}万`;
-  const impliedCapacity = Math.round(state.dailyVolume / (state.currentHeadcount || 1));
+  const impliedCapacity = Math.round(state.dailyVolume * (1 - state.baselineAiRate) / (state.currentHeadcount || 1));
+  const effectiveSalary = state.avgSalary * (1 + (state.salaryAdjustment || 0) / 100);
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col h-full shadow-2xl overflow-hidden font-sans">
@@ -88,6 +90,24 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             />
           </div>
 
+          {/* Baseline AI Rate (Hidden Context in typical UI, but exposed here for logic control) */}
+          <div>
+             <div className="flex justify-between mb-1">
+               <label className="text-slate-300 text-xs">当前自动化率 (Baseline)</label>
+               <span className="text-slate-200 text-xs font-mono bg-slate-800 px-1.5 rounded">{(state.baselineAiRate * 100).toFixed(0)}%</span>
+             </div>
+             <input
+               type="range"
+               min="0"
+               max="0.80"
+               step="0.05"
+               value={state.baselineAiRate}
+               onChange={(e) => onChange({ baselineAiRate: Number(e.target.value) })}
+               className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-slate-500"
+             />
+              <p className="text-[10px] text-slate-500 mt-1">现有 {state.currentHeadcount} 人是在此自动化水平下的配置</p>
+          </div>
+
            {/* Current Headcount */}
            <div>
             <div className="flex justify-between mb-1">
@@ -104,7 +124,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
              <div className="flex justify-between mt-1 text-[10px] text-slate-500">
-                <span>人均产能 (推算):</span>
+                <span>人均处理 (人工):</span>
                 <span className="font-mono text-slate-400">{impliedCapacity} 单/人/天</span>
             </div>
           </div>
@@ -119,7 +139,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           {/* Agent Salary */}
           <div>
             <div className="flex justify-between mb-1">
-              <label className="text-slate-300 text-xs">人工综合年成本</label>
+              <label className="text-slate-300 text-xs">人工综合年成本 (基准)</label>
               <span className="text-slate-200 text-xs font-mono bg-slate-800 px-1.5 rounded">{formatCurrency(state.avgSalary)}</span>
             </div>
             <input
@@ -131,6 +151,28 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               onChange={(e) => onChange({ avgSalary: Number(e.target.value) })}
               className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-rose-500"
             />
+          </div>
+
+          {/* Salary Sensitivity */}
+          <div>
+             <div className="flex justify-between mb-1">
+               <label className="text-slate-300 text-xs">薪资波动模拟</label>
+               <span className={`text-xs font-mono px-1.5 rounded ${state.salaryAdjustment > 0 ? 'text-rose-400 bg-rose-900/30' : state.salaryAdjustment < 0 ? 'text-emerald-400 bg-emerald-900/30' : 'text-slate-400 bg-slate-800'}`}>
+                 {state.salaryAdjustment > 0 ? '+' : ''}{state.salaryAdjustment}%
+               </span>
+             </div>
+             <input
+               type="range"
+               min="-30"
+               max="30"
+               step="5"
+               value={state.salaryAdjustment}
+               onChange={(e) => onChange({ salaryAdjustment: Number(e.target.value) })}
+               className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+             />
+             <p className="text-[10px] text-slate-500 mt-1">
+               实际计算年薪: <span className="font-mono text-slate-400">{formatCurrency(effectiveSalary)}</span>
+             </p>
           </div>
 
            {/* AI System Cost */}
@@ -155,7 +197,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* 3. AI能力模型 */}
         <div className="space-y-4">
           <h3 className="text-[10px] font-bold text-slate-500 uppercase border-b border-slate-800 pb-1 flex items-center gap-2">
-            AI能力模型 <span className="text-slate-600">Capability Model</span>
+            AI能力模型 (目标) <span className="text-slate-600">Target Capabilities</span>
           </h3>
           
           {/* Automate */}
@@ -166,14 +208,14 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </div>
             <input
               type="range"
-              min="0"
+              min={state.baselineAiRate}
               max="0.99"
               step="0.01"
               value={state.aiResolutionRate}
               onChange={(e) => onChange({ aiResolutionRate: Number(e.target.value) })}
               className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
             />
-            <p className="text-[10px] text-slate-500 mt-1">AI独立闭环的高频、简单咨询比例</p>
+            <p className="text-[10px] text-slate-500 mt-1">从 {(state.baselineAiRate * 100).toFixed(0)}% 提升至 {(state.aiResolutionRate * 100).toFixed(0)}%</p>
           </div>
 
           {/* Enhance */}
