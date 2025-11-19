@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   AreaChart,
@@ -23,32 +22,32 @@ const formatTooltipValue = (value: number, name: string) => {
       return `¥${(value / 1000000).toFixed(2)}M`;
     }
     if (Math.abs(value) >= 10000) {
-      return `¥${(value / 10000).toFixed(1)}万`;
+      return `¥${(value / 10000).toFixed(1)}w`;
     }
     return `¥${value.toLocaleString()}`;
   }
 
   if (Math.abs(value) >= 10000) {
-    return `${(value / 10000).toFixed(1)}万`;
+    return `${(value / 10000).toFixed(1)}w`;
   }
   return value.toLocaleString();
 };
 
+// iOS Style Popover Tooltip
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-950/90 backdrop-blur-xl border border-cyan-500/30 p-2 shadow-[0_0_15px_rgba(6,182,212,0.15)] text-[9px] z-50 min-w-[120px]">
-        <div className="flex items-center justify-between mb-1 border-b border-slate-800 pb-0.5">
-           <span className="text-cyan-400 font-mono font-bold uppercase">{label}</span>
-           <span className="w-1 h-1 bg-cyan-500 rounded-full animate-pulse"></span>
+      <div className="bg-zinc-900/80 backdrop-blur-xl border border-white/10 p-2.5 rounded-xl shadow-2xl text-[10px] min-w-[140px]">
+        <div className="mb-1.5 pb-1 border-b border-white/10 text-zinc-400 font-semibold tracking-wide">
+           {label}
         </div>
         {payload.map((entry: any, index: number) => (
-          <div key={index} className="flex items-center justify-between gap-4 mb-0.5">
+          <div key={index} className="flex items-center justify-between gap-4 mb-1 last:mb-0">
             <div className="flex items-center gap-1.5">
-              <span className="w-0.5 h-2 rounded-sm" style={{ backgroundColor: entry.color, boxShadow: `0 0 5px ${entry.color}` }}></span>
-              <span className="text-slate-300 font-mono tracking-tight">{entry.name}</span>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: entry.color }}></span>
+              <span className="text-zinc-300 font-medium">{entry.name}</span>
             </div>
-            <span className="text-white font-mono font-bold" style={{ textShadow: `0 0 5px ${entry.color}`}}>
+            <span className="text-white font-semibold tabular-nums">
               {typeof entry.value === 'number' 
                 ? formatTooltipValue(entry.value, entry.name)
                 : entry.value}
@@ -61,72 +60,59 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const CostComparisonChart: React.FC<{ data: ChartDataPoint[], showComparison: boolean }> = ({ data, showComparison }) => (
-  <div className="hud-card h-full w-full p-1.5 flex flex-col group hover:border-rose-500/50 transition-all duration-300">
-    <div className="flex justify-between items-start mb-0 z-10">
-      <h3 className="text-rose-400 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 border border-rose-500 bg-rose-500/20 shadow-[0_0_5px_#f43f5e]"></span>
-        三年成本预测
+const CardHeader = ({ title, subtitle, color }: { title: string, subtitle?: string, color: string }) => (
+    <div className="flex justify-between items-center mb-0 px-1">
+      <h3 className={`text-[10px] font-semibold flex items-center gap-1.5 ${color}`}>
+        {title}
       </h3>
-      <span className="text-emerald-400 text-[8px] font-mono px-1.5 py-0.5 bg-emerald-900/30 border border-emerald-500/30 shadow-[0_0_8px_rgba(16,185,129,0.2)]">
-        COST PROJECTION
-      </span>
+      {subtitle && (
+        <span className="text-[8px] font-medium text-zinc-500 bg-zinc-800/50 px-1.5 py-0.5 rounded text-center uppercase tracking-wider">
+            {subtitle}
+        </span>
+      )}
     </div>
-    <div className="flex-1 min-h-0 z-10">
+);
+
+export const CostComparisonChart: React.FC<{ data: ChartDataPoint[], showComparison: boolean }> = ({ data, showComparison }) => (
+  <div className="apple-glass h-full w-full p-1.5 flex flex-col rounded-2xl transition-all duration-300">
+    <CardHeader title="成本预测 (3Y) / Cost Proj" subtitle="Forecast" color="text-zinc-200" />
+    <div className="flex-1 min-h-0">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 2, right: 0, left: -20, bottom: 0 }}>
           <defs>
-            <filter id="glowTrad" height="200%">
-               <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
-               <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.95 0 0 0 0 0.24 0 0 0 0 0.36 0 0 0 1 0" result="glow" />
-               <feMerge>
-                   <feMergeNode in="glow" />
-                   <feMergeNode in="SourceGraphic" />
-               </feMerge>
-            </filter>
-            <filter id="glowAI" height="200%">
-               <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
-               <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.06 0 0 0 0 0.72 0 0 0 0 0.50 0 0 0 1 0" result="glow" />
-               <feMerge>
-                   <feMergeNode in="glow" />
-                   <feMergeNode in="SourceGraphic" />
-               </feMerge>
-            </filter>
-            <linearGradient id="colorTrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+            <linearGradient id="gradTrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#ff3b30" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#ff3b30" stopOpacity={0} />
             </linearGradient>
-            <linearGradient id="colorAI" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+            <linearGradient id="gradAI" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#34c759" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#34c759" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="2 2" stroke="#334155" vertical={false} opacity={0.3} />
-          <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#64748b', fontFamily: 'monospace' }} axisLine={false} tickLine={false} dy={2} />
-          <YAxis tick={{ fontSize: 8, fill: '#64748b', fontFamily: 'monospace' }} axisLine={false} tickLine={false} />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend verticalAlign="top" height={16} iconSize={6} iconType="rect" wrapperStyle={{ fontSize: '8px', fontFamily: 'monospace', color: '#94a3b8', top: -2, right: 0 }}/>
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} opacity={0.5} />
+          <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#71717a', fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
+          <YAxis tick={{ fontSize: 8, fill: '#71717a', fontFamily: 'Inter' }} axisLine={false} tickLine={false} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }} />
+          <Legend verticalAlign="top" height={16} iconSize={6} iconType="circle" wrapperStyle={{ fontSize: '9px', fontFamily: 'Inter', color: '#a1a1aa', top: -5, right: 0 }}/>
           <Area
-            name="传统模式"
+            name="传统模式 / Traditional"
             type="monotone"
             dataKey="Traditional"
-            stroke="#f43f5e"
-            strokeWidth={1.5}
+            stroke="#ff3b30"
+            strokeWidth={2}
             fillOpacity={1}
-            fill="url(#colorTrad)"
-            filter="url(#glowTrad)"
+            fill="url(#gradTrad)"
             animationDuration={1500}
           />
           {showComparison && (
             <Area
-                name="AI模式"
+                name="AI模式 / AI Mode"
                 type="monotone"
                 dataKey="AIMode"
-                stroke="#10b981"
-                strokeWidth={1.5}
+                stroke="#34c759"
+                strokeWidth={2}
                 fillOpacity={1}
-                fill="url(#colorAI)"
-                filter="url(#glowAI)"
+                fill="url(#gradAI)"
                 animationDuration={1500}
             />
           )}
@@ -137,29 +123,20 @@ export const CostComparisonChart: React.FC<{ data: ChartDataPoint[], showCompari
 );
 
 export const StaffingChart: React.FC<{ data: ChartDataPoint[] }> = ({ data }) => (
-  <div className="hud-card h-full w-full p-1.5 flex flex-col group hover:border-blue-500/50 transition-all duration-300">
-    <div className="flex justify-between items-start mb-0">
-      <h3 className="text-blue-400 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 border border-blue-500 bg-blue-500/20 shadow-[0_0_5px_#3b82f6]"></span>
-        人力需求对比
-      </h3>
-      <span className="text-blue-300 text-[8px] font-mono px-1.5 py-0.5 bg-blue-900/30 border border-blue-500/30 shadow-[0_0_8px_rgba(59,130,246,0.2)]">HEADCOUNT</span>
-    </div>
+  <div className="apple-glass h-full w-full p-1.5 flex flex-col rounded-2xl transition-all duration-300">
+    <CardHeader title="人力对比 / Headcount" color="text-zinc-200" />
     <div className="flex-1 min-h-0">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }} barGap={0}>
-          <CartesianGrid strokeDasharray="2 2" stroke="#334155" vertical={false} opacity={0.3} />
-          <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#64748b', fontFamily: 'monospace' }} axisLine={false} tickLine={false} dy={2} />
+        <BarChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 0 }} barGap={4}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} opacity={0.5} />
+          <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#71717a', fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
           <YAxis hide />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: '#3b82f6', opacity: 0.1 }} />
-          <Bar name="所需坐席数" dataKey="value" radius={[2, 2, 0, 0]} barSize={30} animationDuration={1000}>
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
+          <Bar name="Agents" dataKey="value" radius={[6, 6, 6, 6]} barSize={32} animationDuration={1000}>
             {data.map((entry: any, index: number) => (
                <Cell 
                  key={`cell-${index}`} 
-                 fill={index === 0 ? '#3b82f6' : '#8b5cf6'} 
-                 stroke={index === 0 ? '#60a5fa' : '#a78bfa'}
-                 strokeWidth={1}
-                 style={{ filter: `drop-shadow(0 0 4px ${index === 0 ? '#3b82f6' : '#8b5cf6'})` }}
+                 fill={index === 0 ? '#007aff' : '#5856d6'} 
                />
             ))}
           </Bar>
@@ -170,35 +147,27 @@ export const StaffingChart: React.FC<{ data: ChartDataPoint[] }> = ({ data }) =>
 );
 
 export const VolumeChart: React.FC<{ data: ChartDataPoint[], subtitle?: string }> = ({ data, subtitle }) => (
-  <div className="hud-card h-full w-full p-1.5 flex flex-col group hover:border-purple-500/50 transition-all duration-300">
-    <div className="flex justify-between items-start mb-0">
-      <h3 className="text-purple-400 text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5">
-         <span className="w-1.5 h-1.5 border border-purple-500 bg-purple-500/20 shadow-[0_0_5px_#a855f7]"></span>
-         工作量结构
-      </h3>
-      <span className="text-purple-300 text-[8px] font-mono px-1.5 py-0.5 bg-purple-900/30 border border-purple-500/30 shadow-[0_0_8px_rgba(168,85,247,0.2)]">
-         {subtitle || "WORKLOAD MIX"}
-      </span>
-    </div>
+  <div className="apple-glass h-full w-full p-1.5 flex flex-col rounded-2xl transition-all duration-300">
+    <CardHeader title="工作量结构 / Mix" subtitle={subtitle} color="text-zinc-200" />
     <div className="flex-1 min-h-0">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 2, right: 0, left: -20, bottom: 0 }} stackOffset="expand">
           <defs>
-            <linearGradient id="colorAIHandled" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.6} />
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
+             <linearGradient id="gradMixAI" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#007aff" stopOpacity={0.6} />
+              <stop offset="95%" stopColor="#007aff" stopOpacity={0.2} />
             </linearGradient>
-            <linearGradient id="colorHumanHandled" x1="0" y1="0" x2="0" y2="1">
-               <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.6} />
-               <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
+            <linearGradient id="gradMixHuman" x1="0" y1="0" x2="0" y2="1">
+               <stop offset="5%" stopColor="#ff9500" stopOpacity={0.6} />
+               <stop offset="95%" stopColor="#ff9500" stopOpacity={0.2} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="2 2" stroke="#334155" vertical={false} opacity={0.3} />
-          <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#64748b', fontFamily: 'monospace' }} axisLine={false} tickLine={false} dy={2} />
-          <YAxis tick={{ fontSize: 8, fill: '#64748b', fontFamily: 'monospace' }} tickFormatter={(val) => `${(val*100).toFixed(0)}%`} axisLine={false} tickLine={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} opacity={0.5} />
+          <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#71717a', fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
+          <YAxis tick={{ fontSize: 8, fill: '#71717a', fontFamily: 'Inter' }} tickFormatter={(val) => `${(val*100).toFixed(0)}%`} axisLine={false} tickLine={false} />
           <Tooltip content={<CustomTooltip />} />
-          <Area type="monotone" dataKey="AIHandled" name="AI处理量" stackId="1" stroke="#10b981" strokeWidth={1.5} fill="url(#colorAIHandled)" animationDuration={1000} style={{ filter: 'drop-shadow(0 0 4px rgba(16,185,129,0.5))' }} />
-          <Area type="monotone" dataKey="HumanHandled" name="人工处理量" stackId="1" stroke="#f59e0b" strokeWidth={1.5} fill="url(#colorHumanHandled)" animationDuration={1000} style={{ filter: 'drop-shadow(0 0 4px rgba(245,158,11,0.5))' }} />
+          <Area type="monotone" dataKey="AIHandled" name="AI" stackId="1" stroke="#007aff" strokeWidth={0} fill="url(#gradMixAI)" animationDuration={1000} />
+          <Area type="monotone" dataKey="HumanHandled" name="Human" stackId="1" stroke="#ff9500" strokeWidth={0} fill="url(#gradMixHuman)" animationDuration={1000} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -206,26 +175,30 @@ export const VolumeChart: React.FC<{ data: ChartDataPoint[], subtitle?: string }
 );
 
 export const EfficiencyGauge: React.FC<{ value: number }> = ({ value }) => (
-  <div className="hud-card h-full w-full p-1.5 flex flex-col justify-center items-center relative overflow-hidden group hover:border-emerald-500/50 transition-all duration-300">
-    {/* Scanning Circle Animation */}
-    <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-         <div className="w-[140px] h-[140px] border border-emerald-500/30 rounded-full animate-[spin_10s_linear_infinite]"></div>
-         <div className="absolute w-[120px] h-[120px] border-t border-b border-emerald-400/50 rounded-full animate-[spin_5s_linear_infinite_reverse]"></div>
-    </div>
-
-    <h3 className="text-emerald-400 text-[9px] font-bold uppercase tracking-widest absolute top-2 left-3 z-10 flex items-center gap-1.5">
-        ROI 成本优化率
+  <div className="apple-glass h-full w-full p-1.5 flex flex-col justify-center items-center relative overflow-hidden rounded-2xl group">
+    <h3 className="text-zinc-400 text-[10px] font-semibold uppercase tracking-wide absolute top-2 left-2 z-10">
+        成本优化 / Optimization
     </h3>
     
-    <div className="text-center z-10 flex flex-col items-center mt-1">
-        <div className="relative">
-           <span className="text-6xl font-bold text-white block tracking-tighter drop-shadow-[0_0_25px_rgba(16,185,129,0.4)] font-mono">
-               {value.toFixed(0)}<span className="text-2xl text-emerald-500 align-top">%</span>
-           </span>
+    <div className="relative z-10 flex flex-col items-center">
+        {/* Apple Ring Style */}
+        <div className="relative w-32 h-32 flex items-center justify-center">
+             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#27272a" strokeWidth="8" />
+                <circle 
+                    cx="50" cy="50" r="40" fill="none" stroke="#34c759" strokeWidth="8" 
+                    strokeLinecap="round"
+                    strokeDasharray={`${value * 2.51} 251`}
+                    className="transition-all duration-1000 ease-out"
+                />
+             </svg>
+             <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl font-bold text-white tracking-tight">
+                    {value.toFixed(0)}%
+                </span>
+                <span className="text-[9px] text-zinc-400 font-medium mt-0.5">COST REDUCTION</span>
+             </div>
         </div>
-        <span className="text-emerald-200/70 text-[8px] font-mono mt-1 block tracking-widest border border-emerald-500/20 px-2 py-0.5 bg-emerald-900/20 backdrop-blur-sm">
-            COST REDUCTION
-        </span>
     </div>
   </div>
 );
