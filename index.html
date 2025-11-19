@@ -21,28 +21,31 @@
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         overflow: hidden;
         -webkit-font-smoothing: antialiased;
+        transition: background 0.5s ease, color 0.5s ease;
       }
 
-      /* Apple-style Glassmorphism */
+      /* Apple-style Glassmorphism (Dark Default) */
       .apple-glass {
         background: rgba(28, 28, 30, 0.65);
         backdrop-filter: blur(25px);
         -webkit-backdrop-filter: blur(25px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
+        transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
       }
 
       .apple-glass-light {
         background: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: background 0.3s;
       }
 
       /* macOS Control Center Slider Logic */
       .macos-slider-track {
         position: relative;
         overflow: hidden;
-        border-radius: 8px; /* Squircle-ish */
+        border-radius: 8px;
         background: rgba(255, 255, 255, 0.1);
         transition: background 0.2s;
       }
@@ -93,13 +96,122 @@
         100% { transform: scale(1.2); opacity: 0.8; }
       }
 
+      /* --- Light Mode Overrides (Reference Image Style: Blue/White/Clean) --- */
+      body.light-mode {
+        background-color: #f0f7ff; /* Very light blue tint */
+        background-image: 
+            radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+            radial-gradient(circle at 100% 100%, rgba(124, 58, 237, 0.08) 0%, transparent 40%);
+        color: #1e3a8a; /* Deep Brand Blue for text */
+      }
+
+      body.light-mode .apple-glass {
+        background: #ffffff;
+        backdrop-filter: none;
+        border: 1px solid #bfdbfe; /* Blue 200 - Distinct Border */
+        box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.1), 0 2px 6px -1px rgba(37, 99, 235, 0.05);
+      }
+
+      body.light-mode .apple-glass-light {
+        background: #eff6ff; /* Blue 50 */
+        border: 1px solid #dbeafe; /* Blue 100 */
+      }
+
+      /* Controls */
+      body.light-mode .macos-slider-track {
+        background: #e2e8f0; /* Slate 200 */
+        border: 1px solid #cbd5e1;
+      }
+      body.light-mode .macos-slider-track:hover {
+        background: #cbd5e1;
+      }
+
+      /* Typography Mappings (Deep Blue & Slate Theme) */
+      body.light-mode .text-white { color: #1e3a8a !important; } /* Blue 900 - Headers */
+      body.light-mode .text-zinc-100 { color: #172554 !important; } 
+      body.light-mode .text-zinc-200 { color: #1e40af !important; } /* Blue 800 */
+      body.light-mode .text-zinc-300 { color: #1d4ed8 !important; font-weight: 600; } /* Blue 700 */
+      body.light-mode .text-zinc-400 { color: #475569 !important; font-weight: 500; } /* Slate 600 - Body Text */
+      body.light-mode .text-zinc-500 { color: #64748b !important; } /* Slate 500 */
+      body.light-mode .text-zinc-600 { color: #94a3b8 !important; } 
+      
+      /* Accent Colors - Pop against white */
+      body.light-mode .text-emerald-400 { color: #059669 !important; font-weight: 700; } /* Emerald 600 */
+      body.light-mode .text-blue-400 { color: #2563eb !important; font-weight: 700; } /* Blue 600 */
+      body.light-mode .text-purple-400 { color: #7c3aed !important; font-weight: 700; } /* Purple 600 */
+      body.light-mode .text-rose-400 { color: #dc2626 !important; font-weight: 700; } /* Red 600 */
+      
+      /* Specific Component Overrides */
+      body.light-mode .bg-black\/40 { 
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        border-bottom: 1px solid #bfdbfe !important; 
+      }
+
+      body.light-mode .bg-black\/20 {
+        background-color: #f8fafc !important; /* Slate 50 */
+        border: 1px solid #e2e8f0 !important;
+      }
+
+      body.light-mode .bg-zinc-800\/50 {
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      }
+
+      body.light-mode .bg-zinc-900\/40 {
+         background-color: #f1f5f9 !important;
+         border-top: 1px solid #e2e8f0 !important;
+      }
+
+      /* Segmented Control */
+      body.light-mode .bg-zinc-600 { 
+        background-color: #2563eb !important; /* Brand Blue */
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3) !important;
+      } 
+      body.light-mode .bg-zinc-700\/50 {
+        background-color: #e2e8f0 !important;
+        color: #475569 !important;
+      }
+
+      /* Buttons - Gradient Style from Ref Image */
+      body.light-mode .bg-white { 
+        background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important; 
+        color: #ffffff !important; 
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4);
+        border: none !important;
+      }
+      body.light-mode .text-black { color: #ffffff !important; } /* Fix button text color */
+      
+      /* Secondary Buttons */
+      body.light-mode .bg-white\/10 {
+        background-color: #eff6ff !important;
+        border: 1px solid #bfdbfe !important;
+      }
+      body.light-mode .bg-white\/5 {
+         background: linear-gradient(to right, #f8fafc, #eff6ff) !important;
+         border: 1px solid #e2e8f0 !important;
+      }
+      
+      body.light-mode .border-white\/5 { border-color: #e2e8f0 !important; }
+      body.light-mode .border-white\/10 { border-color: #cbd5e1 !important; }
+
+      /* Chart Specifics */
+      body.light-mode .recharts-cartesian-grid-horizontal line { stroke: #e2e8f0 !important; }
+      body.light-mode .recharts-text { fill: #64748b !important; font-weight: 500; }
+
+      /* Hide Aurora in Light Mode */
+      body.light-mode .siri-gradient { display: none !important; }
+      
+      /* Avatar Section Background in Light Mode */
+      body.light-mode .bg-black { background-color: #dbeafe !important; } /* Light Blue for avatar container */
+
       /* Print Styles */
       @media print {
         body { background: white !important; color: black !important; }
         .apple-glass { background: white !important; border: 1px solid #ccc !important; box-shadow: none !important; color: black !important; }
         .no-print { display: none !important; }
         .text-white { color: black !important; }
-        .text-slate-400 { color: #666 !important; }
       }
     </style>
   <script type="importmap">

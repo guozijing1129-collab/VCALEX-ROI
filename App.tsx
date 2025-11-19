@@ -138,6 +138,16 @@ const App: React.FC = () => {
   const [analysis, setAnalysis] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showComparison, setShowComparison] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Handle Dark Mode Logic
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.remove('light-mode');
+    } else {
+      document.body.classList.add('light-mode');
+    }
+  }, [isDarkMode]);
 
   const handleScenarioChange = (newScenario: ScenarioType) => {
     setScenario(newScenario);
@@ -207,12 +217,39 @@ const App: React.FC = () => {
     setIsAnalyzing(false);
   };
 
+  const handleShare = async () => {
+    const shareText = `[ALEXAGI ZENAVA ROI Analysis]\n` +
+      `ROI: ${metrics.roi.toFixed(0)}%\n` +
+      `Annual Savings: ¥${(metrics.savings / 10000).toFixed(1)}w\n` +
+      `Payback Period: ${metrics.yearsToBreakeven < 1 ? (metrics.yearsToBreakeven * 12).toFixed(1) + " months" : metrics.yearsToBreakeven.toFixed(1) + " years"}\n` +
+      `Workload Reduction: ${(metrics.humanWorkloadReduction / 10000).toFixed(0)}w tasks\n\n` +
+      `AI Strategic Insight:\n${analysis || "Analysis pending..."}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'ALEXAGI ZENAVA ROI Analysis',
+          text: shareText,
+        });
+      } catch (err) {
+        // User cancelled
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert('Analysis copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy', err);
+      }
+    }
+  };
+
   useEffect(() => {
      setAnalysis("系统就绪。请点击右侧按钮，基于当前配置生成AI可行性分析报告。\nSystem ready. Click button to generate AI analysis.");
   }, []);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden selection:bg-blue-500/30 bg-black">
+    <div className="h-screen flex flex-col overflow-hidden selection:bg-blue-500/30 bg-transparent">
       
       {/* Header */}
       <header className="flex justify-between items-center px-4 py-3 shrink-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-md h-[56px]">
@@ -227,6 +264,18 @@ const App: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDarkMode ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+              )}
+            </button>
+
              <div 
                 className="flex items-center gap-3 cursor-pointer group" 
                 onClick={() => setShowComparison(!showComparison)}
@@ -266,8 +315,8 @@ const App: React.FC = () => {
             
             {/* Top Row (Weight: 4) */}
             <div className="min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-1.5" style={{ flex: 4 }}>
-                <CostComparisonChart data={costTrendData} showComparison={showComparison} />
-                <StaffingChart data={staffingData} />
+                <CostComparisonChart data={costTrendData} showComparison={showComparison} isDarkMode={isDarkMode} />
+                <StaffingChart data={staffingData} isDarkMode={isDarkMode} />
                 <div className="flex flex-col gap-1.5 h-full min-h-0">
                     <div className="flex-1 min-h-0"><EfficiencyGauge value={metrics.roi > 0 ? ((metrics.traditionalCost - metrics.aiModeCost) / metrics.traditionalCost * 100) : 0} /></div>
                     <div className="shrink-0"><ROICalculationDetails metrics={metrics} state={state} /></div>
@@ -276,7 +325,7 @@ const App: React.FC = () => {
 
             {/* Middle Row (Weight: 2.5) */}
             <div className="min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-1.5" style={{ flex: 2.5 }}>
-                <VolumeChart data={workloadData} subtitle={showComparison ? "Target" : "Current"} />
+                <VolumeChart data={workloadData} subtitle={showComparison ? "Target" : "Current"} isDarkMode={isDarkMode} />
                 
                 <div className="apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group">
                     <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl"></div>
@@ -330,6 +379,16 @@ const App: React.FC = () => {
                           <div className="text-white text-xs font-semibold leading-tight">ZENAVA AI<br/>价值ROI分析</div>
                           <div className="text-zinc-400 text-[9px] mt-1">Gemini 2.5 Pro</div>
                      </div>
+                     
+                     <button
+                        onClick={handleShare}
+                        className="mt-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/5 text-[9px] font-medium text-zinc-300 hover:text-white transition-all active:scale-95 group"
+                     >
+                        <svg className="w-3 h-3 text-zinc-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        Share
+                     </button>
                 </div>
 
                 {/* Right Content Section */}
