@@ -31,10 +31,11 @@ const TypewriterEffect: React.FC<{ text: string; speed?: number }> = ({ text, sp
 
   useEffect(() => {
     setDisplayedText('');
+    const content = text || '';
     let i = 0;
     const timer = setInterval(() => {
-      if (i < text.length) {
-        setDisplayedText((prev) => prev + text.charAt(i));
+      if (i < content.length) {
+        setDisplayedText((prev) => prev + content.charAt(i));
         i++;
       } else {
         clearInterval(timer);
@@ -247,7 +248,8 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content - Layout Optimized for Full Screen */}
-      <div className="flex flex-1 overflow-hidden p-1.5 gap-1.5 relative h-[calc(100vh-56px)]">
+      {/* Fixed: Added inline style for calculation to prevent parsing errors and used inline styles for flex ratios */}
+      <div className="flex flex-1 overflow-hidden p-1.5 gap-1.5 relative" style={{ height: 'calc(100vh - 56px)' }}>
         
         {/* Sidebar */}
         <div className="w-[280px] lg:w-[320px] h-full flex flex-col no-print z-10 shrink-0">
@@ -263,7 +265,7 @@ const App: React.FC = () => {
         <div className="flex-1 h-full min-w-0 z-10 flex flex-col gap-1.5">
             
             {/* Top Row (Weight: 4) */}
-            <div className="flex-[4] min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-1.5">
+            <div className="min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-1.5" style={{ flex: 4 }}>
                 <CostComparisonChart data={costTrendData} showComparison={showComparison} />
                 <StaffingChart data={staffingData} />
                 <div className="flex flex-col gap-1.5 h-full min-h-0">
@@ -273,7 +275,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Middle Row (Weight: 2.5) */}
-            <div className="flex-[2.5] min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-1.5">
+            <div className="min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-1.5" style={{ flex: 2.5 }}>
                 <VolumeChart data={workloadData} subtitle={showComparison ? "Target" : "Current"} />
                 
                 <div className="apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group">
@@ -309,7 +311,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Bottom Row (Weight: 2.5) */}
-            <div className="flex-[2.5] min-h-0 relative rounded-2xl border border-white/10 overflow-hidden flex">
+            <div className="min-h-0 relative rounded-2xl border border-white/10 overflow-hidden flex" style={{ flex: 2.5 }}>
                 <div className="absolute inset-0 bg-black">
                     <div className="siri-gradient absolute inset-0 opacity-40"></div>
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-xl"></div>
@@ -319,7 +321,7 @@ const App: React.FC = () => {
                 <div className="w-[140px] lg:w-[160px] flex flex-col items-center justify-center border-r border-white/5 bg-white/5 shrink-0 relative z-10">
                      <div className="relative w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden border-2 border-white/10 shadow-2xl shadow-purple-500/20">
                         <img 
-                            src="https://cdn3d.iconscout.com/3d/free/thumb/free-woman-avatar-4432759-3682492.png" 
+                            src="https://img.freepik.com/premium-photo/anime-girl-wearing-headphones-using-laptop_1000124-358.jpg" 
                             alt="ZENAVA Agent"
                             className={`w-full h-full object-cover bg-gradient-to-b from-indigo-500/20 to-purple-500/20 ${isAnalyzing ? 'animate-pulse' : ''}`}
                         />
