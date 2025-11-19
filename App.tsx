@@ -211,10 +211,10 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden selection:bg-blue-500/30">
+    <div className="h-screen flex flex-col overflow-hidden selection:bg-blue-500/30 bg-black">
       
-      {/* macOS Style Toolbar */}
-      <header className="flex justify-between items-center px-6 py-3 shrink-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-md h-[56px]">
+      {/* Header */}
+      <header className="flex justify-between items-center px-4 py-3 shrink-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-md h-[56px]">
         <div className="flex items-center gap-3">
            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-lg shadow-blue-500/20 flex items-center justify-center text-white font-bold text-lg">
               A
@@ -226,7 +226,6 @@ const App: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
-             {/* iOS Style Toggle */}
              <div 
                 className="flex items-center gap-3 cursor-pointer group" 
                 onClick={() => setShowComparison(!showComparison)}
@@ -247,10 +246,11 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden p-2 gap-2 relative h-[calc(100vh-56px)]">
+      {/* Main Content - Layout Optimized for Full Screen */}
+      <div className="flex flex-1 overflow-hidden p-1.5 gap-1.5 relative h-[calc(100vh-56px)]">
         
         {/* Sidebar */}
-        <div className="w-[320px] h-full flex flex-col no-print z-10 shrink-0">
+        <div className="w-[280px] lg:w-[320px] h-full flex flex-col no-print z-10 shrink-0">
           <ControlPanel 
             state={state} 
             onChange={(updates) => setState(prev => ({ ...prev, ...updates }))}
@@ -259,99 +259,94 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Dashboard */}
-        <div className="flex-1 flex flex-col gap-0 h-full min-w-0 z-10">
+        {/* Dashboard Grid - Full Flex */}
+        <div className="flex-1 h-full min-w-0 z-10 flex flex-col gap-1.5">
             
-            {/* Charts Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2 min-h-0 pb-0">
+            {/* Top Row (Weight: 4) */}
+            <div className="flex-[4] min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-1.5">
+                <CostComparisonChart data={costTrendData} showComparison={showComparison} />
+                <StaffingChart data={staffingData} />
+                <div className="flex flex-col gap-1.5 h-full min-h-0">
+                    <div className="flex-1 min-h-0"><EfficiencyGauge value={metrics.roi > 0 ? ((metrics.traditionalCost - metrics.aiModeCost) / metrics.traditionalCost * 100) : 0} /></div>
+                    <div className="shrink-0"><ROICalculationDetails metrics={metrics} state={state} /></div>
+                </div>
+            </div>
+
+            {/* Middle Row (Weight: 2.5) */}
+            <div className="flex-[2.5] min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-1.5">
+                <VolumeChart data={workloadData} subtitle={showComparison ? "Target" : "Current"} />
                 
-                {/* Top Row: Cost, Staffing, Gauge - Increased height */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-[36vh] min-h-[260px] shrink-0">
-                    <CostComparisonChart data={costTrendData} showComparison={showComparison} />
-                    <StaffingChart data={staffingData} />
-                    <div className="flex flex-col gap-2 h-full">
-                        <div className="flex-1 min-h-0"><EfficiencyGauge value={metrics.roi > 0 ? ((metrics.traditionalCost - metrics.aiModeCost) / metrics.traditionalCost * 100) : 0} /></div>
-                        <div className="shrink-0"><ROICalculationDetails metrics={metrics} state={state} /></div>
+                <div className="apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group">
+                    <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl"></div>
+                    <h3 className="text-zinc-400 text-[11px] font-semibold uppercase tracking-wide z-10">年度节省 / Savings</h3>
+                    <div className="z-10">
+                        <div className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
+                            ¥{(metrics.savings / 10000).toFixed(0)}<span className="text-lg text-zinc-500 font-medium">w</span>
+                        </div>
+                        <div className="text-emerald-400 text-[11px] font-medium mt-1">
+                            ▲ {((metrics.savings / metrics.traditionalCost) * 100).toFixed(1)}% 优化幅度
+                        </div>
+                    </div>
+                    <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden mt-2">
+                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.max(0, Math.min(100, ((metrics.savings / metrics.traditionalCost) * 100)))}%` }}></div>
                     </div>
                 </div>
 
-                {/* Middle Row: Volume, KPIs - Balanced height */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 h-[26vh] min-h-[180px] shrink-0">
-                    <VolumeChart data={workloadData} subtitle={showComparison ? "Target" : "Current"} />
-                    
-                    {/* KPI Card: Savings */}
-                    <div className="apple-glass rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group">
-                        <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl"></div>
-                        <h3 className="text-zinc-400 text-[11px] font-semibold uppercase tracking-wide z-10">年度节省 / Savings</h3>
-                        <div className="z-10">
-                            <div className="text-3xl font-bold text-white tracking-tight">
-                                ¥{(metrics.savings / 10000).toFixed(0)}<span className="text-lg text-zinc-500 font-medium">w</span>
-                            </div>
-                            <div className="text-emerald-400 text-[11px] font-medium mt-1">
-                                ▲ {((metrics.savings / metrics.traditionalCost) * 100).toFixed(1)}% 优化幅度
-                            </div>
+                <div className="apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group">
+                      <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
+                    <h3 className="text-zinc-400 text-[11px] font-semibold uppercase tracking-wide z-10">编制优化 / Optimization</h3>
+                    <div className="flex items-end justify-between z-10 mt-2">
+                        <div>
+                            <div className="text-[10px] text-zinc-500 mb-0.5">Current</div>
+                            <div className="text-lg lg:text-xl font-medium text-zinc-300">{metrics.traditionalStaff.toFixed(0)}</div>
                         </div>
-                        <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden mt-2">
-                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.max(0, Math.min(100, ((metrics.savings / metrics.traditionalCost) * 100)))}%` }}></div>
-                        </div>
-                    </div>
-
-                    {/* KPI Card: Headcount */}
-                    <div className="apple-glass rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group">
-                         <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                        <h3 className="text-zinc-400 text-[11px] font-semibold uppercase tracking-wide z-10">编制优化 / Optimization</h3>
-                        <div className="flex items-end justify-between z-10 mt-2">
-                            <div>
-                                <div className="text-[10px] text-zinc-500 mb-0.5">Current</div>
-                                <div className="text-xl font-medium text-zinc-300">{metrics.traditionalStaff.toFixed(0)}</div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-[10px] text-blue-400 mb-0.5 font-semibold">Target</div>
-                                <div className="text-3xl font-bold text-white">{metrics.aiModeStaff.toFixed(1)}</div>
-                            </div>
+                        <div className="text-right">
+                            <div className="text-[10px] text-blue-400 mb-0.5 font-semibold">Target</div>
+                            <div className="text-2xl lg:text-3xl font-bold text-white">{metrics.aiModeStaff.toFixed(1)}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* AI Analysis - Reduced Height */}
-            <div className="h-[22vh] min-h-[160px] shrink-0 relative mt-0 overflow-hidden rounded-2xl border border-white/10">
-                {/* Aurora Background */}
+            {/* Bottom Row (Weight: 2.5) */}
+            <div className="flex-[2.5] min-h-0 relative rounded-2xl border border-white/10 overflow-hidden flex">
                 <div className="absolute inset-0 bg-black">
                     <div className="siri-gradient absolute inset-0 opacity-40"></div>
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-xl"></div>
                 </div>
                 
-                <div className="relative z-10 flex h-full">
-                     {/* Floating Orb / Status */}
-                     <div className="w-[160px] flex flex-col items-center justify-center border-r border-white/5 bg-white/5">
-                         <div className={`w-16 h-16 rounded-full blur-xl transition-all duration-1000 ${isAnalyzing ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse' : 'bg-white/10'}`}></div>
-                         <div className="absolute w-12 h-12 bg-gradient-to-tr from-blue-400 to-purple-500 rounded-full shadow-lg shadow-purple-500/30"></div>
-                         <div className="mt-6 text-center">
-                             <div className="text-white text-xs font-semibold">ZENAVA AI 价值ROI分析</div>
-                             <div className="text-zinc-400 text-[10px]">Gemini 2.5 Pro</div>
-                         </div>
+                {/* Left Avatar Section */}
+                <div className="w-[140px] lg:w-[160px] flex flex-col items-center justify-center border-r border-white/5 bg-white/5 shrink-0 relative z-10">
+                     <div className="relative w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden border-2 border-white/10 shadow-2xl shadow-purple-500/20">
+                        <img 
+                            src="https://cdn3d.iconscout.com/3d/free/thumb/free-woman-avatar-4432759-3682492.png" 
+                            alt="ZENAVA Agent"
+                            className={`w-full h-full object-cover bg-gradient-to-b from-indigo-500/20 to-purple-500/20 ${isAnalyzing ? 'animate-pulse' : ''}`}
+                        />
                      </div>
-
-                     {/* Content Area */}
-                     <div className="flex-1 flex flex-col p-0">
-                        <div className="flex justify-between items-center px-6 py-3 border-b border-white/5">
-                             <h3 className="text-zinc-300 text-[11px] font-medium tracking-wide">策略分析 / STRATEGIC INSIGHT</h3>
-                             <button 
-                                onClick={handleAnalyze}
-                                disabled={isAnalyzing}
-                                className="px-4 py-1.5 bg-white text-black hover:bg-zinc-200 disabled:opacity-50 text-[11px] font-semibold rounded-full transition-all active:scale-95 shadow-lg shadow-white/10"
-                            >
-                                {isAnalyzing ? '思考中 Thinking...' : '生成分析 Analyze'}
-                            </button>
-                        </div>
-                        <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">
-                            <TypewriterEffect text={analysis} speed={15} />
-                        </div>
+                     <div className="mt-3 text-center px-2">
+                          <div className="text-white text-xs font-semibold leading-tight">ZENAVA AI<br/>价值ROI分析</div>
+                          <div className="text-zinc-400 text-[9px] mt-1">Gemini 2.5 Pro</div>
                      </div>
                 </div>
-            </div>
 
+                {/* Right Content Section */}
+                <div className="flex-1 flex flex-col p-0 min-w-0 relative z-10">
+                    <div className="flex justify-between items-center px-4 py-2 border-b border-white/5 shrink-0">
+                          <h3 className="text-zinc-300 text-[11px] font-medium tracking-wide">策略分析 / STRATEGIC INSIGHT</h3>
+                          <button 
+                            onClick={handleAnalyze}
+                            disabled={isAnalyzing}
+                            className="px-3 py-1 bg-white text-black hover:bg-zinc-200 disabled:opacity-50 text-[10px] font-semibold rounded-full transition-all active:scale-95 shadow-lg shadow-white/10"
+                        >
+                            {isAnalyzing ? '思考中 Thinking...' : '生成分析 Analyze'}
+                        </button>
+                    </div>
+                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
+                        <TypewriterEffect text={analysis} speed={15} />
+                    </div>
+                </div>
+            </div>
         </div>
       </div>
     </div>
