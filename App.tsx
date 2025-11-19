@@ -344,6 +344,32 @@ const App: React.FC = () => {
                             {isAnalyzing ? '思考中 Thinking...' : '生成分析 Analyze'}
                         </button>
                     </div>
+                    
+                    {/* New KPI Summary Bar */}
+                    <div className="grid grid-cols-3 gap-2 px-4 py-3 border-b border-white/5 bg-white/5 backdrop-blur-sm">
+                        <div className="space-y-0.5">
+                             <div className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">ROI</div>
+                             <div className="text-base font-bold text-white leading-none">
+                                 {metrics.roi.toFixed(0)}%
+                             </div>
+                        </div>
+                        <div className="space-y-0.5 border-l border-white/10 pl-3">
+                             <div className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">Payback</div>
+                             <div className="text-base font-bold text-blue-400 leading-none">
+                                 {metrics.yearsToBreakeven < 1 
+                                    ? <>{(metrics.yearsToBreakeven * 12).toFixed(1)}<span className="text-[10px] ml-0.5 font-normal opacity-70">mo</span></>
+                                    : <>{metrics.yearsToBreakeven.toFixed(1)}<span className="text-[10px] ml-0.5 font-normal opacity-70">yr</span></>
+                                 }
+                             </div>
+                        </div>
+                        <div className="space-y-0.5 border-l border-white/10 pl-3">
+                             <div className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold">Workload Lift</div>
+                             <div className="text-base font-bold text-emerald-400 leading-none">
+                                 {(metrics.humanWorkloadReduction / 10000).toFixed(0)}<span className="text-[10px] ml-0.5 font-normal opacity-70">w</span>
+                             </div>
+                        </div>
+                    </div>
+
                     <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
                         <TypewriterEffect text={analysis} speed={15} />
                     </div>
