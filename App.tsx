@@ -12,7 +12,7 @@ const INITIAL_STATE: SimulationState = {
   salaryAdjustment: 0, 
   baselineAiRate: 0.6, 
   aiResolutionRate: 0.86, 
-  aiEfficiencyBoost: 1.3, 
+  aiEfficiencyBoost: 1.4, // Updated to reflect sum of default enhance factors (40%)
   aiSystemCost: 500000, 
   
   volumeVoiceShare: 30, 
@@ -23,6 +23,8 @@ const INITIAL_STATE: SimulationState = {
   enhanceKnowledge: 10,
   enhanceNavigation: 5,
   enhanceSummary: 5,
+  enhanceInsight: 5,
+  enhanceRisk: 5,
 };
 
 // --- Smooth Typewriter ---
@@ -31,7 +33,9 @@ const TypewriterEffect: React.FC<{ text: string; speed?: number }> = ({ text, sp
 
   useEffect(() => {
     setDisplayedText('');
-    const content = text || '';
+    // Pre-process text: remove double newlines to avoid paragraph gaps (隔行), ensure compact spacing
+    const content = (text || '').replace(/\n\s*\n/g, '\n');
+    
     let i = 0;
     const timer = setInterval(() => {
       if (i < content.length) {
@@ -45,7 +49,7 @@ const TypewriterEffect: React.FC<{ text: string; speed?: number }> = ({ text, sp
   }, [text, speed]);
 
   return (
-    <p className="text-zinc-100 text-sm leading-relaxed font-normal whitespace-pre-wrap tracking-wide transition-all">
+    <p className="text-zinc-100 text-sm leading-snug font-normal whitespace-pre-wrap tracking-wide transition-all">
       {displayedText}
     </p>
   );
@@ -345,15 +349,58 @@ const App: React.FC = () => {
 
                 <div className="apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group">
                       <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
-                    <h3 className="text-zinc-400 text-[11px] font-semibold uppercase tracking-wide z-10">编制优化 / Optimization</h3>
-                    <div className="flex items-end justify-between z-10 mt-2">
-                        <div>
-                            <div className="text-[10px] text-zinc-500 mb-0.5">Current</div>
-                            <div className="text-lg lg:text-xl font-medium text-zinc-300">{metrics.traditionalStaff.toFixed(0)}</div>
+                    
+                    {/* Header */}
+                    <div className="flex justify-between items-start z-10 relative">
+                         <h3 className="text-zinc-400 text-[11px] font-semibold uppercase tracking-wide">编制优化 / Optimization</h3>
+                         <div className="flex items-center gap-1 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 backdrop-blur-sm">
+                             <svg className="w-2.5 h-2.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                             </svg>
+                             <span className="text-[10px] font-bold text-emerald-400">
+                                 {metrics.traditionalStaff > 0 ? ((1 - metrics.aiModeStaff / metrics.traditionalStaff) * 100).toFixed(0) : 0}%
+                             </span>
+                         </div>
+                    </div>
+
+                    {/* Graphical Body */}
+                    <div className="z-10 mt-2 flex flex-col gap-3">
+                        {/* Progress Bar Visual */}
+                        <div className="relative w-full h-2.5 bg-zinc-700/30 rounded-full overflow-hidden">
+                             {/* Tick marks or grid lines background for scale context */}
+                            <div className="absolute inset-0 flex justify-between px-0.5">
+                                <div className="w-px h-full bg-zinc-500/10"></div>
+                                <div className="w-px h-full bg-zinc-500/10"></div>
+                                <div className="w-px h-full bg-zinc-500/10"></div>
+                                <div className="w-px h-full bg-zinc-500/10"></div>
+                            </div>
+                            <div 
+                                className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-all duration-1000"
+                                style={{ width: `${metrics.traditionalStaff > 0 ? Math.min(100, (metrics.aiModeStaff / metrics.traditionalStaff) * 100) : 0}%` }}
+                            >
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <div className="text-[10px] text-blue-400 mb-0.5 font-semibold">Target</div>
-                            <div className="text-2xl lg:text-3xl font-bold text-white">{metrics.aiModeStaff.toFixed(1)}</div>
+
+                        {/* Data Points */}
+                        <div className="flex justify-between items-end">
+                            <div className="flex flex-col">
+                                <span className="text-[9px] text-zinc-500 uppercase tracking-wider">Current</span>
+                                <span className="text-lg font-medium text-zinc-300 tabular-nums leading-none">
+                                    {metrics.traditionalStaff.toFixed(0)}
+                                </span>
+                            </div>
+                            
+                             {/* Visual connector */}
+                             <div className="mb-1.5 text-zinc-600/30">
+                                 ······▶
+                             </div>
+
+                            <div className="flex flex-col items-end">
+                                <span className="text-[9px] text-blue-400 uppercase tracking-wider font-semibold">Target AI</span>
+                                <span className="text-2xl font-bold text-white tabular-nums leading-none drop-shadow-sm">
+                                    {metrics.aiModeStaff.toFixed(1)}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

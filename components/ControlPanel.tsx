@@ -1,3 +1,4 @@
+
 import React, { memo } from 'react';
 import { SimulationState, ScenarioType } from '../types';
 
@@ -130,6 +131,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       enhanceKnowledge: state.enhanceKnowledge,
       enhanceNavigation: state.enhanceNavigation,
       enhanceSummary: state.enhanceSummary,
+      enhanceInsight: state.enhanceInsight,
+      enhanceRisk: state.enhanceRisk,
     };
     // @ts-ignore
     factors[factor] = value;
@@ -138,7 +141,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       factors.enhanceSmartFill + 
       factors.enhanceKnowledge + 
       factors.enhanceNavigation + 
-      factors.enhanceSummary
+      factors.enhanceSummary + 
+      factors.enhanceInsight + 
+      factors.enhanceRisk
     ) / 100;
 
     onChange({ 
@@ -319,6 +324,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                { key: 'enhanceKnowledge', label: '知识推荐 Know', color: 'bg-purple-500' },
                { key: 'enhanceNavigation', label: '业务导航 Nav', color: 'bg-purple-500' },
                { key: 'enhanceSummary', label: '总结转移 Sum', color: 'bg-purple-500' },
+               { key: 'enhanceInsight', label: '进线洞察 Ins', color: 'bg-purple-500' },
+               { key: 'enhanceRisk', label: '智能风控 Risk', color: 'bg-purple-500' },
             ].map((item) => (
                <div key={item.key} className="flex items-center gap-2">
                   <label className="w-16 text-[8px] text-zinc-400 truncate">{item.label}</label>

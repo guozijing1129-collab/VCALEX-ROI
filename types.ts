@@ -19,6 +19,8 @@ export interface SimulationState {
   enhanceKnowledge: number; // Knowledge recommendation
   enhanceNavigation: number; // SOP/Business Navigation
   enhanceSummary: number; // Conversation Summary & Transfer
+  enhanceInsight: number; // Incoming Insight
+  enhanceRisk: number; // Smart Risk Control
 }
 
 export interface SimulationMetrics {
