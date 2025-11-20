@@ -4,7 +4,11 @@ export interface SimulationState {
   currentHeadcount: number; // Current number of agents (Baseline)
   avgSalary: number; // Annual salary per agent (RMB)
   salaryAdjustment: number; // Percentage adjustment for salary sensitivity (-30 to +30)
+  
   baselineAiRate: number; // Existing automation rate (e.g., 0.6) corresponding to current headcount
+  baselineVoiceRate: number; // Baseline Voice Automation Rate (0-1)
+  baselineTextRate: number; // Baseline Text Automation Rate (0-1)
+
   aiResolutionRate: number; // Target % handled by AI (0-1) [Weighted Average]
   aiEfficiencyBoost: number; // Efficiency gain for humans using AI tools (e.g. 1.3x)
   aiSystemCost: number; // Annual cost of AI system

@@ -102,7 +102,28 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   const impliedCapacity = Math.round(state.dailyVolume * (1 - state.baselineAiRate) / (state.currentHeadcount || 1));
   const effectiveSalary = state.avgSalary * (1 + (state.salaryAdjustment || 0) / 100);
 
-  // Update Logic for Automate Mix
+  // Update Logic for Baseline Mix
+  const updateBaselineFactor = (factor: 'baselineVoiceRate' | 'baselineTextRate', value: number) => {
+    const factors = {
+      baselineVoiceRate: state.baselineVoiceRate,
+      baselineTextRate: state.baselineTextRate,
+    };
+    // @ts-ignore
+    factors[factor] = value;
+
+    // Weighted Average Calculation using CURRENT volume share (assuming same channel mix)
+    const voiceWeight = state.volumeVoiceShare / 100;
+    const textWeight = 1 - voiceWeight;
+    const weightedRate = (factors.baselineVoiceRate * voiceWeight) + (factors.baselineTextRate * textWeight);
+
+    onChange({
+      // @ts-ignore
+      [factor]: value,
+      baselineAiRate: weightedRate
+    });
+  };
+
+  // Update Logic for Automate Mix (Target)
   const updateAutomateFactor = (factor: 'volumeVoiceShare' | 'automateVoiceRate' | 'automateTextRate', value: number) => {
     const factors = {
       volumeVoiceShare: state.volumeVoiceShare,
@@ -112,15 +133,20 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     // @ts-ignore
     factors[factor] = value;
 
-    // Weighted Average Calculation
     const voiceWeight = factors.volumeVoiceShare / 100;
     const textWeight = 1 - voiceWeight;
-    const weightedRate = (factors.automateVoiceRate * voiceWeight) + (factors.automateTextRate * textWeight);
+    
+    // Recalculate Target Weighted Average
+    const weightedTargetRate = (factors.automateVoiceRate * voiceWeight) + (factors.automateTextRate * textWeight);
+    
+    // Recalculate Baseline Weighted Average (as volume mix changes)
+    const weightedBaselineRate = (state.baselineVoiceRate * voiceWeight) + (state.baselineTextRate * textWeight);
 
     onChange({
       // @ts-ignore
       [factor]: value,
-      aiResolutionRate: weightedRate
+      aiResolutionRate: weightedTargetRate,
+      baselineAiRate: weightedBaselineRate // Update baseline aggregate too
     });
   };
 
@@ -200,15 +226,40 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               accentColor="bg-blue-500"
             />
 
-            <RangeInput
-              label="当前自动化 / Curr Auto"
-              value={state.baselineAiRate}
-              min="0" max="0.80" step="0.05"
-              displayValue={`${(state.baselineAiRate * 100).toFixed(0)}%`}
-              onChange={(val) => onChange({ baselineAiRate: val })}
-              accentColor="bg-zinc-500"
-              subLabel={`${state.currentHeadcount} agents @ ${(state.baselineAiRate * 100).toFixed(0)}% auto`}
-            />
+            {/* Revised Baseline Automate Card (Split Voice/Text) */}
+            <div className="apple-glass-light rounded-xl p-2.5 space-y-2">
+               <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-medium text-zinc-300">当前自动化 / Curr Auto</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-zinc-200">{(state.baselineAiRate * 100).toFixed(0)}%</span>
+               </div>
+               <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                     <div className="flex justify-between text-[8px] text-zinc-400">
+                        <span>语音 Voice</span>
+                        <span className="text-white">{(state.baselineVoiceRate * 100).toFixed(0)}%</span>
+                     </div>
+                     <div className="macos-slider-track h-1.5 rounded-full">
+                        <div className="absolute inset-y-0 left-0 bg-zinc-500 rounded-full" style={{ width: `${state.baselineVoiceRate*100}%` }}></div>
+                        <input type="range" min="0" max="1" step="0.01" value={state.baselineVoiceRate} onChange={(e) => updateBaselineFactor('baselineVoiceRate', Number(e.target.value))} className="overlay-input" />
+                     </div>
+                  </div>
+                  <div className="space-y-1">
+                     <div className="flex justify-between text-[8px] text-zinc-400">
+                        <span>文本 Text</span>
+                        <span className="text-white">{(state.baselineTextRate * 100).toFixed(0)}%</span>
+                     </div>
+                     <div className="macos-slider-track h-1.5 rounded-full">
+                        <div className="absolute inset-y-0 left-0 bg-zinc-400 rounded-full" style={{ width: `${state.baselineTextRate*100}%` }}></div>
+                        <input type="range" min="0" max="1" step="0.01" value={state.baselineTextRate} onChange={(e) => updateBaselineFactor('baselineTextRate', Number(e.target.value))} className="overlay-input" />
+                     </div>
+                  </div>
+               </div>
+               <div className="text-[8px] text-zinc-500 text-right">
+                   {state.currentHeadcount} agents @ {(state.baselineAiRate * 100).toFixed(0)}% auto
+               </div>
+            </div>
 
             <RangeInput
               label="现有编制 / Headcount"

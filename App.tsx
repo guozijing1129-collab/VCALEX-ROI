@@ -10,7 +10,11 @@ const INITIAL_STATE: SimulationState = {
   currentHeadcount: 80, 
   avgSalary: 100000, 
   salaryAdjustment: 0, 
-  baselineAiRate: 0.6, 
+  
+  baselineAiRate: 0.60, 
+  baselineVoiceRate: 0.30, // 30% voice share * 0.3 = 0.09
+  baselineTextRate: 0.73,  // 70% text share * 0.73 = 0.511 => Total ~0.60
+  
   aiResolutionRate: 0.86, 
   aiEfficiencyBoost: 1.4, // Updated to reflect sum of default enhance factors (40%)
   aiSystemCost: 500000, 
@@ -157,13 +161,16 @@ const App: React.FC = () => {
     setScenario(newScenario);
     switch (newScenario) {
       case ScenarioType.DAILY:
-        setState(prev => ({ ...prev, dailyVolume: 20000, currentHeadcount: 80, baselineAiRate: 0.60, volumeVoiceShare: 30, automateVoiceRate: 0.70, automateTextRate: 0.93, aiResolutionRate: 0.77, salaryAdjustment: 0 }));
+        // Voice Share 30% -> weighted ~0.60
+        setState(prev => ({ ...prev, dailyVolume: 20000, currentHeadcount: 80, baselineVoiceRate: 0.30, baselineTextRate: 0.73, baselineAiRate: 0.601, volumeVoiceShare: 30, automateVoiceRate: 0.70, automateTextRate: 0.93, aiResolutionRate: 0.77, salaryAdjustment: 0 }));
         break;
       case ScenarioType.PEAK:
-        setState(prev => ({ ...prev, dailyVolume: 40000, currentHeadcount: 160, baselineAiRate: 0.60, volumeVoiceShare: 25, automateVoiceRate: 0.65, automateTextRate: 0.90, aiResolutionRate: 0.83, salaryAdjustment: 0 })); 
+        // Voice Share 25% -> weighted ~0.60
+        setState(prev => ({ ...prev, dailyVolume: 40000, currentHeadcount: 160, baselineVoiceRate: 0.35, baselineTextRate: 0.68, baselineAiRate: 0.5975, volumeVoiceShare: 25, automateVoiceRate: 0.65, automateTextRate: 0.90, aiResolutionRate: 0.83, salaryAdjustment: 0 })); 
         break;
       case ScenarioType.NIGHT:
-        setState(prev => ({ ...prev, dailyVolume: 2500, currentHeadcount: 5, baselineAiRate: 0.60, volumeVoiceShare: 10, automateVoiceRate: 0.80, automateTextRate: 0.98, aiResolutionRate: 0.96, salaryAdjustment: 0 })); 
+        // Voice Share 10% -> weighted ~0.60
+        setState(prev => ({ ...prev, dailyVolume: 2500, currentHeadcount: 5, baselineVoiceRate: 0.10, baselineTextRate: 0.65, baselineAiRate: 0.595, volumeVoiceShare: 10, automateVoiceRate: 0.80, automateTextRate: 0.98, aiResolutionRate: 0.96, salaryAdjustment: 0 })); 
         break;
     }
   };
