@@ -1,5 +1,6 @@
 
 export interface SimulationState {
+  projectName: string; // Project Name
   dailyVolume: number; // Total inquiries per day
   currentHeadcount: number; // Current number of agents (Baseline)
   avgSalary: number; // Annual salary per agent (RMB)

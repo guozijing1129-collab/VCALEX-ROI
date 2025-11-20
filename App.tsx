@@ -6,6 +6,7 @@ import { SimulationState, SimulationMetrics, ScenarioType, ChartDataPoint } from
 import { analyzeSimulation } from './services/geminiService';
 
 const INITIAL_STATE: SimulationState = {
+  projectName: "ZENAVA Pilot 2025",
   dailyVolume: 20000, 
   currentHeadcount: 80, 
   avgSalary: 100000, 
@@ -230,6 +231,7 @@ const App: React.FC = () => {
 
   const handleShare = async () => {
     const shareText = `[ALEXAGI ZENAVA ROI Analysis]\n` +
+      `Project: ${state.projectName}\n` +
       `ROI: ${metrics.roi.toFixed(0)}%\n` +
       `Annual Savings: ¥${(metrics.savings / 10000).toFixed(1)}w\n` +
       `Payback Period: ${metrics.yearsToBreakeven < 1 ? (metrics.yearsToBreakeven * 12).toFixed(1) + " months" : metrics.yearsToBreakeven.toFixed(1) + " years"}\n` +
@@ -239,7 +241,7 @@ const App: React.FC = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'ALEXAGI ZENAVA ROI Analysis',
+          title: `ZENAVA Analysis - ${state.projectName}`,
           text: shareText,
         });
       } catch (err) {

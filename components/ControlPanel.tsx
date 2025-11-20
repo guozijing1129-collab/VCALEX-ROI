@@ -183,9 +183,23 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       
       {/* Panel Header */}
       <div className="px-3 pt-3 pb-2 shrink-0 border-b border-white/5">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-3">
           <div className="w-1.5 h-1.5 rounded-full bg-zinc-500"></div>
           <h2 className="text-white text-[11px] font-semibold tracking-wide">参数配置 / CONFIG</h2>
+        </div>
+        
+        {/* Project Name Input */}
+        <div className="mb-2">
+             <div className="flex items-center justify-between mb-1">
+                <label className="text-[9px] text-zinc-500 font-medium uppercase tracking-wider">Project Name</label>
+             </div>
+             <input
+                type="text"
+                value={state.projectName || ''}
+                onChange={(e) => onChange({ projectName: e.target.value })}
+                className="w-full bg-zinc-900/50 text-white text-[10px] px-2 py-1.5 rounded border border-white/10 focus:border-blue-500/50 outline-none transition-all placeholder-zinc-600"
+                placeholder="Project Name"
+             />
         </div>
         
         {/* iOS Segmented Control for Scenarios */}
