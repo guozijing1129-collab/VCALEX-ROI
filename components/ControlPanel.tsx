@@ -409,19 +409,34 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
       </div>
 
-      {/* Status Footer */}
-      <div className="shrink-0 border-t border-white/5 p-2 bg-zinc-900/40 mt-auto flex justify-between items-center relative z-20">
-         <div className="flex gap-3">
-             <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                <span className="text-[9px] font-medium text-zinc-400">Online</span>
+      {/* Status Footer with Attribution */}
+      <div className="shrink-0 border-t border-white/5 bg-zinc-900/40 mt-auto flex flex-col relative z-20">
+         {/* Attribution */}
+         <div className="px-3 py-1.5 border-b border-white/5 space-y-0.5">
+             <div className="flex justify-between items-center text-[8px]">
+                 <span className="text-zinc-500">评估单位 Unit</span>
+                 <span className="text-zinc-300 font-medium tracking-tight">VCALEX ZENAVA研究院</span>
              </div>
-             <div className="flex items-center gap-1.5">
-                <svg className="w-2.5 h-2.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>
-                <span className="text-[9px] font-medium text-zinc-400">G-2.5-Flash</span>
+             <div className="flex justify-between items-center text-[8px]">
+                 <span className="text-zinc-500">联系电邮 Email</span>
+                 <span className="text-zinc-300 font-medium tracking-tight">vcalexagi@gmail.com</span>
              </div>
          </div>
-         <div className="text-[9px] font-medium text-zinc-600">v2.5</div>
+
+         {/* System Status */}
+         <div className="p-2 flex justify-between items-center">
+            <div className="flex gap-3">
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span className="text-[9px] font-medium text-zinc-400">Online</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <svg className="w-2.5 h-2.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" /></svg>
+                    <span className="text-[9px] font-medium text-zinc-400">G-2.5-Flash</span>
+                </div>
+            </div>
+            <div className="text-[9px] font-medium text-zinc-600">v2.5</div>
+         </div>
       </div>
 
     </div>

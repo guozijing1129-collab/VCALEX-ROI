@@ -80,8 +80,8 @@ interface ChartProps {
 }
 
 export const CostComparisonChart: React.FC<ChartProps & { showComparison: boolean }> = ({ data, showComparison, isDarkMode = true }) => {
-  const gridColor = isDarkMode ? "#333" : "#e2e8f0"; // Slate 200 for light mode
-  const axisColor = isDarkMode ? "#71717a" : "#64748b"; // Slate 500 for text
+  const gridColor = isDarkMode ? "#333" : "#cbd5e1"; // Darker slate for light mode
+  const axisColor = isDarkMode ? "#71717a" : "#475569"; // High contrast slate for light mode
 
   return (
     <div className="apple-glass h-full w-full p-1.5 flex flex-col rounded-2xl transition-all duration-300">
@@ -100,8 +100,8 @@ export const CostComparisonChart: React.FC<ChartProps & { showComparison: boolea
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} opacity={0.6} />
-            <XAxis dataKey="name" tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
-            <YAxis tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter' }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="name" tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter', fontWeight: 500 }} axisLine={false} tickLine={false} dy={5} />
+            <YAxis tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter', fontWeight: 500 }} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} cursor={{ stroke: isDarkMode ? 'rgba(255,255,255,0.1)' : '#cbd5e1', strokeWidth: 1 }} />
             <Legend verticalAlign="top" height={16} iconSize={6} iconType="circle" wrapperStyle={{ fontSize: '9px', fontFamily: 'Inter', color: axisColor, top: -5, right: 0 }}/>
             <Area
@@ -134,8 +134,8 @@ export const CostComparisonChart: React.FC<ChartProps & { showComparison: boolea
 };
 
 export const StaffingChart: React.FC<ChartProps> = ({ data, isDarkMode = true }) => {
-    const gridColor = isDarkMode ? "#333" : "#e2e8f0";
-    const axisColor = isDarkMode ? "#71717a" : "#64748b";
+    const gridColor = isDarkMode ? "#333" : "#cbd5e1";
+    const axisColor = isDarkMode ? "#71717a" : "#475569";
 
     return (
         <div className="apple-glass h-full w-full p-1.5 flex flex-col rounded-2xl transition-all duration-300">
@@ -144,9 +144,9 @@ export const StaffingChart: React.FC<ChartProps> = ({ data, isDarkMode = true })
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 0 }} barGap={4}>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} opacity={0.6} />
-                <XAxis dataKey="name" tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
+                <XAxis dataKey="name" tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter', fontWeight: 500 }} axisLine={false} tickLine={false} dy={5} />
                 <YAxis hide />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: isDarkMode ? 'rgba(255,255,255,0.05)' : '#f1f5f9' }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: isDarkMode ? 'rgba(255,255,255,0.05)' : '#e2e8f0' }} />
                 <Bar name="Agents" dataKey="value" radius={[6, 6, 6, 6]} barSize={32} animationDuration={1000}>
                     {data.map((entry: any, index: number) => (
                     <Cell 
@@ -163,8 +163,8 @@ export const StaffingChart: React.FC<ChartProps> = ({ data, isDarkMode = true })
 };
 
 export const VolumeChart: React.FC<ChartProps & { subtitle?: string }> = ({ data, subtitle, isDarkMode = true }) => {
-  const gridColor = isDarkMode ? "#333" : "#e2e8f0";
-  const axisColor = isDarkMode ? "#71717a" : "#64748b";
+  const gridColor = isDarkMode ? "#333" : "#cbd5e1";
+  const axisColor = isDarkMode ? "#71717a" : "#475569";
 
   return (
     <div className="apple-glass h-full w-full p-1.5 flex flex-col rounded-2xl transition-all duration-300">
@@ -183,8 +183,8 @@ export const VolumeChart: React.FC<ChartProps & { subtitle?: string }> = ({ data
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} opacity={0.6} />
-            <XAxis dataKey="name" tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter' }} axisLine={false} tickLine={false} dy={5} />
-            <YAxis tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter' }} tickFormatter={(val) => `${(val*100).toFixed(0)}%`} axisLine={false} tickLine={false} />
+            <XAxis dataKey="name" tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter', fontWeight: 500 }} axisLine={false} tickLine={false} dy={5} />
+            <YAxis tick={{ fontSize: 8, fill: axisColor, fontFamily: 'Inter', fontWeight: 500 }} tickFormatter={(val) => `${(val*100).toFixed(0)}%`} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Area type="monotone" dataKey="AIHandled" name="AI" stackId="1" stroke="#3b82f6" strokeWidth={0} fill="url(#gradMixAI)" animationDuration={1000} />
             <Area type="monotone" dataKey="HumanHandled" name="Human" stackId="1" stroke="#f59e0b" strokeWidth={0} fill="url(#gradMixHuman)" animationDuration={1000} />
@@ -195,34 +195,41 @@ export const VolumeChart: React.FC<ChartProps & { subtitle?: string }> = ({ data
   );
 };
 
-export const EfficiencyGauge: React.FC<{ value: number }> = ({ value }) => (
-  <div className="apple-glass h-full w-full p-1 flex flex-col items-center relative overflow-hidden rounded-2xl group">
-    <h3 className="text-zinc-500 text-[9px] font-bold uppercase tracking-wider absolute top-1.5 left-2 z-20 light:text-slate-400">
-        成本优化 / Optimization
-    </h3>
-    
-    <div className="flex-1 w-full min-h-0 flex items-center justify-center relative z-10 p-1">
-        <div className="aspect-square h-full max-h-full w-auto relative">
-             <svg className="w-full h-full" viewBox="0 0 100 100">
-                {/* Background Circle */}
-                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" className="text-zinc-800/30 dark:text-zinc-800 light:text-slate-200" strokeWidth="8" />
-                {/* Value Circle - Rotated -90deg equivalent via transform */}
-                <circle 
-                    cx="50" cy="50" r="42" fill="none" stroke="#22c55e" strokeWidth="8" 
-                    strokeLinecap="round"
-                    strokeDasharray={`${value * 2.64} 264`} 
-                    transform="rotate(-90 50 50)"
-                    className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-                />
-                {/* SVG Text for perfect scaling */}
-                <text x="50" y="48" textAnchor="middle" className="fill-white light:fill-blue-900 font-bold" fontSize="22" dy=".3em">
-                    {value.toFixed(0)}%
-                </text>
-                <text x="50" y="68" textAnchor="middle" className="fill-zinc-400 light:fill-slate-500 font-medium" fontSize="6">
-                    COST REDUCTION
-                </text>
-             </svg>
-        </div>
+export const EfficiencyGauge: React.FC<{ value: number, isDarkMode?: boolean }> = ({ value, isDarkMode = true }) => {
+  // Explicit high-contrast colors for Light Mode
+  const textColor = isDarkMode ? '#ffffff' : '#1e3a8a'; // Deep Blue for Light Mode
+  const subTextColor = isDarkMode ? '#a1a1aa' : '#475569'; // Slate 600
+  const trackColor = isDarkMode ? 'text-zinc-800' : 'text-slate-200';
+
+  return (
+    <div className="apple-glass h-full w-full p-1 flex flex-col items-center relative overflow-hidden rounded-2xl group">
+      <h3 className="text-zinc-500 text-[9px] font-bold uppercase tracking-wider absolute top-1.5 left-2 z-20 light:text-slate-500">
+          成本优化 / Optimization
+      </h3>
+      
+      <div className="flex-1 w-full min-h-0 flex items-center justify-center relative z-10 p-1">
+          <div className="aspect-square h-full max-h-full w-auto relative">
+              <svg className="w-full h-full" viewBox="0 0 100 100">
+                  {/* Background Circle */}
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" className={`${trackColor} opacity-30`} strokeWidth="8" />
+                  {/* Value Circle */}
+                  <circle 
+                      cx="50" cy="50" r="42" fill="none" stroke="#22c55e" strokeWidth="8" 
+                      strokeLinecap="round"
+                      strokeDasharray={`${value * 2.64} 264`} 
+                      transform="rotate(-90 50 50)"
+                      className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_rgba(34,197,94,0.4)]"
+                  />
+                  {/* SVG Text with explicit fill */}
+                  <text x="50" y="48" textAnchor="middle" fill={textColor} className="font-bold fill-current" fontSize="22" dy=".3em">
+                      {value.toFixed(0)}%
+                  </text>
+                  <text x="50" y="68" textAnchor="middle" fill={subTextColor} className="font-medium fill-current" fontSize="6">
+                      COST REDUCTION
+                  </text>
+              </svg>
+          </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};

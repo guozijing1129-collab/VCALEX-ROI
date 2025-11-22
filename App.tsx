@@ -130,7 +130,7 @@ const ROICalculationDetails: React.FC<{ metrics: SimulationMetrics, state: Simul
             className="w-full px-3 py-2 flex justify-between items-center text-[10px] font-semibold text-zinc-400 hover:text-white hover:bg-white/5 transition-colors shrink-0 cursor-pointer outline-none"
         >
             <span>ROI测算公式 / Formula</span>
-            <svg className={`w-3 h-3 text-zinc-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3 h-3 text-zinc-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
             </svg>
         </button>
@@ -180,7 +180,6 @@ const App: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showComparison, setShowComparison] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [isMobileControlOpen, setIsMobileControlOpen] = useState(false);
 
   // Handle Dark Mode Logic
   useEffect(() => {
@@ -301,7 +300,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-[100dvh] lg:h-screen overflow-hidden selection:bg-blue-500/30 bg-transparent w-full">
+    <div className="flex flex-col h-[100dvh] overflow-hidden selection:bg-blue-500/30 bg-transparent w-full">
       
       {/* Header */}
       <header className="flex justify-between items-center px-4 py-3 shrink-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-md h-[56px] w-full">
@@ -349,11 +348,10 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content - Responsive Container */}
-      {/* 16:9 (Desktop): Fixed h-screen layout. 9:16 (Mobile): Scrollable vertical layout. */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden p-2 lg:p-1.5 gap-4 lg:gap-1.5 relative w-full">
+      <div className="flex-1 flex flex-col lg:flex-row h-[calc(100dvh-56px)] overflow-hidden p-2 lg:p-1.5 gap-4 lg:gap-1.5 relative w-full">
         
-        {/* Sidebar - Full width on Mobile, Fixed width on Desktop */}
-        <div className="w-full lg:w-[320px] h-auto lg:h-full flex flex-col no-print z-10 shrink-0">
+        {/* Sidebar - Fixed width on Desktop */}
+        <div className="w-full lg:w-[320px] h-auto lg:h-full flex flex-col no-print z-10 shrink-0 overflow-y-auto custom-scrollbar">
           <ControlPanel 
             state={state} 
             onChange={(updates) => setState(prev => ({ ...prev, ...updates }))}
@@ -362,22 +360,21 @@ const App: React.FC = () => {
           />
         </div>
         
-        {/* Dashboard Grid - Adaptive Layout */}
-        <div className="flex-1 h-auto lg:h-full min-w-0 z-10 flex flex-col gap-3 lg:gap-1.5 pb-6 lg:pb-0">
+        {/* Dashboard Grid - Scrollable on overflow */}
+        <div className="flex-1 h-full min-w-0 z-10 flex flex-col gap-3 lg:gap-1.5 overflow-y-auto custom-scrollbar pb-6 lg:pb-0">
             
-            {/* Top Row (Cost, Staff, Opt) */}
-            {/* Mobile: Stacked Column. Desktop: 3-Col Grid */}
-            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-1.5 lg:flex-[4] lg:min-h-0">
+            {/* Top Row (Cost, Staff, Opt) - Flex 4 */}
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-1.5 lg:flex-[4] min-h-[300px] lg:min-h-[200px]">
                 <div className="h-[300px] lg:h-full"><CostComparisonChart data={costTrendData} showComparison={showComparison} isDarkMode={isDarkMode} /></div>
                 <div className="h-[300px] lg:h-full"><StaffingChart data={staffingData} isDarkMode={isDarkMode} /></div>
                 <div className="flex flex-col gap-3 lg:gap-1.5 h-auto lg:h-full lg:min-h-0">
-                    <div className="h-[200px] lg:flex-1 lg:min-h-0 relative"><EfficiencyGauge value={metrics.roi > 0 ? ((metrics.traditionalCost - metrics.aiModeCost) / metrics.traditionalCost * 100) : 0} /></div>
+                    <div className="h-[200px] lg:flex-1 lg:min-h-0 relative"><EfficiencyGauge value={metrics.roi > 0 ? ((metrics.traditionalCost - metrics.aiModeCost) / metrics.traditionalCost * 100) : 0} isDarkMode={isDarkMode} /></div>
                     <div className="shrink-0"><ROICalculationDetails metrics={metrics} state={state} /></div>
                 </div>
             </div>
 
-            {/* Middle Row (Volume, Savings, Optimization) */}
-            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-1.5 lg:flex-[2.5] lg:min-h-0">
+            {/* Middle Row (Volume, Savings, Optimization) - Flex 2.5 */}
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-1.5 lg:flex-[2.5] min-h-[250px] lg:min-h-[140px]">
                 <div className="h-[250px] lg:h-full"><VolumeChart data={workloadData} subtitle={showComparison ? "Target" : "Current"} isDarkMode={isDarkMode} /></div>
                 
                 <div className="h-[140px] lg:h-full apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group">
@@ -455,8 +452,8 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* Bottom Row (Analysis) */}
-            <div className="min-h-[300px] lg:min-h-0 lg:flex-[2.5] relative rounded-2xl border border-white/10 overflow-hidden flex flex-col lg:flex-row w-full light:border-blue-200 light:bg-white light:shadow-sm">
+            {/* Bottom Row (Analysis) - Flex 2.5 */}
+            <div className="min-h-[300px] lg:min-h-[180px] lg:flex-[2.5] relative rounded-2xl border border-white/10 overflow-hidden flex flex-col lg:flex-row w-full light:border-blue-200 light:bg-white light:shadow-sm">
                 <div className="absolute inset-0 bg-black light:hidden">
                     <div className="siri-gradient absolute inset-0 opacity-40"></div>
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-xl"></div>
@@ -544,6 +541,7 @@ const App: React.FC = () => {
           <div className="text-[9px] text-zinc-400 font-mono mt-1">ZENAVA INTELLIGENCE</div>
       </div>
 
+      <div className="watermark"></div>
     </div>
   );
 };
