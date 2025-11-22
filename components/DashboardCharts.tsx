@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   AreaChart,
@@ -195,29 +196,32 @@ export const VolumeChart: React.FC<ChartProps & { subtitle?: string }> = ({ data
 };
 
 export const EfficiencyGauge: React.FC<{ value: number }> = ({ value }) => (
-  <div className="apple-glass h-full w-full p-1.5 flex flex-col justify-center items-center relative overflow-hidden rounded-2xl group">
-    <h3 className="text-zinc-400 text-[10px] font-semibold uppercase tracking-wide absolute top-2 left-2 z-10">
+  <div className="apple-glass h-full w-full p-1 flex flex-col items-center relative overflow-hidden rounded-2xl group">
+    <h3 className="text-zinc-500 text-[9px] font-bold uppercase tracking-wider absolute top-1.5 left-2 z-20 light:text-slate-400">
         成本优化 / Optimization
     </h3>
     
-    <div className="relative z-10 flex flex-col items-center">
-        {/* Apple Ring Style */}
-        <div className="relative w-32 h-32 flex items-center justify-center">
-             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" className="text-zinc-800/50 dark:text-zinc-800 light:text-slate-200" strokeWidth="8" />
+    <div className="flex-1 w-full min-h-0 flex items-center justify-center relative z-10 p-1">
+        <div className="aspect-square h-full max-h-full w-auto relative">
+             <svg className="w-full h-full" viewBox="0 0 100 100">
+                {/* Background Circle */}
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" className="text-zinc-800/30 dark:text-zinc-800 light:text-slate-200" strokeWidth="8" />
+                {/* Value Circle - Rotated -90deg equivalent via transform */}
                 <circle 
-                    cx="50" cy="50" r="40" fill="none" stroke="#22c55e" strokeWidth="8" 
+                    cx="50" cy="50" r="42" fill="none" stroke="#22c55e" strokeWidth="8" 
                     strokeLinecap="round"
-                    strokeDasharray={`${value * 2.51} 251`}
-                    className="transition-all duration-1000 ease-out"
+                    strokeDasharray={`${value * 2.64} 264`} 
+                    transform="rotate(-90 50 50)"
+                    className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_rgba(34,197,94,0.4)]"
                 />
-             </svg>
-             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-bold text-white tracking-tight">
+                {/* SVG Text for perfect scaling */}
+                <text x="50" y="48" textAnchor="middle" className="fill-white light:fill-blue-900 font-bold" fontSize="22" dy=".3em">
                     {value.toFixed(0)}%
-                </span>
-                <span className="text-[9px] text-zinc-400 font-medium mt-0.5">COST REDUCTION</span>
-             </div>
+                </text>
+                <text x="50" y="68" textAnchor="middle" className="fill-zinc-400 light:fill-slate-500 font-medium" fontSize="6">
+                    COST REDUCTION
+                </text>
+             </svg>
         </div>
     </div>
   </div>
