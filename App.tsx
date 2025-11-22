@@ -32,24 +32,33 @@ const INITIAL_STATE: SimulationState = {
   enhanceRisk: 5,
 };
 
-// --- Apple-style AI Avatar Component ---
-const AppleAIAvatar: React.FC<{ className?: string, isAnimating?: boolean }> = ({ className, isAnimating }) => (
-  <div className={`relative flex items-center justify-center rounded-full overflow-hidden bg-black ${className}`}>
-    {/* Base Gradient Layer */}
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-black"></div>
+// --- AI Doctor / Tech Avatar Component ---
+const AIDoctorAvatar: React.FC<{ className?: string, isAnimating?: boolean }> = ({ className, isAnimating }) => (
+  <div className={`relative flex items-center justify-center rounded-full overflow-hidden bg-black border border-blue-500/30 ${className}`}>
+    {/* Base Glow */}
+    <div className="absolute inset-0 bg-blue-900/20 z-0"></div>
     
-    {/* Animated Glowing Orbs */}
-    <div className={`absolute top-[-10%] left-[-10%] w-[70%] h-[70%] bg-blue-500 rounded-full blur-xl opacity-60 mix-blend-screen ${isAnimating ? 'animate-pulse' : ''}`} style={{ animationDuration: '3s' }}></div>
-    <div className={`absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] bg-cyan-400 rounded-full blur-xl opacity-60 mix-blend-screen ${isAnimating ? 'animate-pulse' : ''}`} style={{ animationDuration: '4s', animationDelay: '0.5s' }}></div>
-    <div className={`absolute top-[30%] right-[-10%] w-[60%] h-[60%] bg-purple-500 rounded-full blur-xl opacity-60 mix-blend-screen ${isAnimating ? 'animate-pulse' : ''}`} style={{ animationDuration: '5s', animationDelay: '1s' }}></div>
-    <div className={`absolute bottom-[10%] left-[10%] w-[50%] h-[50%] bg-pink-500 rounded-full blur-xl opacity-50 mix-blend-screen ${isAnimating ? 'animate-pulse' : ''}`} style={{ animationDuration: '4.5s', animationDelay: '1.5s' }}></div>
+    {/* Rotating HUD Rings */}
+    <div className={`absolute inset-0 rounded-full border border-dashed border-blue-400/30 z-20 ${isAnimating ? 'animate-spin-slow' : ''}`} style={{ animationDuration: '10s' }}></div>
+    <div className={`absolute inset-[4px] rounded-full border border-t-transparent border-l-transparent border-r-blue-500/40 border-b-blue-500/40 z-20 ${isAnimating ? 'animate-spin' : ''}`} style={{ animationDuration: '3s', animationDirection: 'reverse' }}></div>
+
+    {/* Image with Holographic Filter */}
+    <div className="relative w-full h-full z-10 p-1">
+       <img 
+         src="./zenava_logo.png" 
+         alt="AI Doctor" 
+         className="w-full h-full object-cover rounded-full filter contrast-125 brightness-110"
+       />
+       {/* Scanline Overlay */}
+       <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(59,130,246,0.1)_50%)] bg-[length:100%_4px] pointer-events-none mix-blend-overlay rounded-full"></div>
+       {/* Blue Tint Gradient */}
+       <div className="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent mix-blend-color pointer-events-none rounded-full"></div>
+    </div>
     
-    {/* Glass/Gloss Overlay */}
-    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-50"></div>
-    <div className="absolute inset-0 rounded-full border border-white/20 shadow-[inset_0_0_12px_rgba(255,255,255,0.2)]"></div>
-    
-    {/* Central Core Shine */}
-    <div className="absolute w-[30%] h-[30%] bg-white rounded-full blur-md opacity-40 mix-blend-overlay"></div>
+    {/* Active Status Dot */}
+    {isAnimating && (
+       <div className="absolute bottom-1 right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full border border-black shadow-[0_0_8px_#34d399] z-30 animate-pulse"></div>
+    )}
   </div>
 );
 
@@ -295,8 +304,8 @@ const App: React.FC = () => {
       {/* Header */}
       <header className="flex justify-between items-center px-4 py-3 shrink-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-md h-[56px] w-full">
         <div className="flex items-center gap-3">
-           {/* Logo - Apple Style AI Icon */}
-           <AppleAIAvatar className="w-8 h-8 shadow-lg shadow-blue-500/20 border border-white/10" isAnimating={true} />
+           {/* Logo - Uses same tech aesthetic as avatar */}
+           <AIDoctorAvatar className="w-8 h-8 border-white/10" isAnimating={true} />
            <div>
               <h1 className="text-sm font-semibold text-white tracking-wide truncate max-w-[200px] lg:max-w-none">ZENAVA智能客服ROI价值仿真</h1>
               <p className="text-[10px] text-zinc-400 font-medium hidden lg:block">ALEXAGI AI Feasibility Assessment Unit</p>
@@ -457,7 +466,7 @@ const App: React.FC = () => {
                 <div className="w-full lg:w-[160px] h-[140px] lg:h-auto flex lg:flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-white/5 bg-white/5 shrink-0 relative z-10 gap-4 lg:gap-0 p-4 lg:p-0">
                      {/* Avatar Image */}
                      <div className="relative w-20 h-20 lg:w-24 lg:h-24 p-1 shrink-0">
-                        <AppleAIAvatar className="w-full h-full border-2 border-white/10 shadow-2xl shadow-purple-500/20" isAnimating={isAnalyzing} />
+                        <AIDoctorAvatar className="w-full h-full shadow-2xl shadow-blue-500/20" isAnimating={isAnalyzing} />
                      </div>
                      <div className="flex flex-col lg:items-center text-left lg:text-center lg:mt-3">
                           <div className="text-white text-xs font-semibold leading-tight">ZENAVA AI<br/>价值ROI分析</div>
