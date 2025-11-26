@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import ControlPanel from './components/ControlPanel';
 import { CostComparisonChart, StaffingChart, VolumeChart, EfficiencyGauge } from './components/DashboardCharts';
@@ -124,10 +123,10 @@ const ROICalculationDetails: React.FC<{ metrics: SimulationMetrics, state: Simul
   };
 
   return (
-    <div className="apple-glass h-full flex flex-col rounded-2xl overflow-hidden transition-all">
+    <div className="apple-glass h-full flex flex-col rounded-2xl overflow-hidden transition-all print:h-auto print:overflow-visible">
         <button 
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full px-3 py-2 flex justify-between items-center text-[10px] font-semibold text-zinc-400 hover:text-white hover:bg-white/5 transition-colors shrink-0 cursor-pointer outline-none"
+            className="w-full px-3 py-2 flex justify-between items-center text-[10px] font-semibold text-zinc-400 hover:text-white hover:bg-white/5 transition-colors shrink-0 cursor-pointer outline-none no-print"
         >
             <span>ROI测算公式 / Formula</span>
             <svg className="w-3 h-3 text-zinc-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,8 +134,9 @@ const ROICalculationDetails: React.FC<{ metrics: SimulationMetrics, state: Simul
             </svg>
         </button>
         
-        <div className={`flex-1 overflow-hidden transition-all duration-300 bg-black/20 ${isOpen ? 'max-h-[260px] opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="p-3 space-y-3 h-full overflow-y-auto custom-scrollbar flex flex-col">
+        {/* Force expansion in print via global CSS override for max-h-0, but also add print utility here just in case */}
+        <div className={`flex-1 overflow-hidden transition-all duration-300 bg-black/20 ${isOpen ? 'max-h-[260px] opacity-100' : 'max-h-0 opacity-0'} print:max-h-none print:opacity-100 print:block print:overflow-visible`}>
+            <div className="p-3 space-y-3 h-full overflow-y-auto custom-scrollbar flex flex-col print:h-auto print:overflow-visible">
                
                <div className="space-y-1">
                   <h4 className="text-emerald-400 font-semibold text-[10px]">现有需求 Baseline</h4>
@@ -300,10 +300,10 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-[100dvh] overflow-hidden selection:bg-blue-500/30 bg-transparent w-full">
+    <div className="flex flex-col h-[100dvh] overflow-hidden selection:bg-blue-500/30 bg-transparent w-full print:h-auto print:overflow-visible">
       
       {/* Header */}
-      <header className="flex justify-between items-center px-4 py-3 shrink-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-md h-[56px] w-full">
+      <header className="flex justify-between items-center px-4 py-3 shrink-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-md h-[56px] w-full no-print">
         <div className="flex items-center gap-3">
            {/* Logo - Tech Quantum Core */}
            <TechQuantumAvatar className="w-8 h-8 border-cyan-500/20" isAnimating={true} />
@@ -348,10 +348,10 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content - Responsive Container */}
-      <div className="flex-1 flex flex-col lg:flex-row h-[calc(100dvh-56px)] overflow-hidden p-2 lg:p-1.5 gap-4 lg:gap-1.5 relative w-full">
+      <div className="flex-1 flex flex-col lg:flex-row h-[calc(100dvh-56px)] overflow-hidden p-2 lg:p-1.5 gap-4 lg:gap-1.5 relative w-full print:h-auto print:overflow-visible">
         
-        {/* Sidebar - Fixed width on Desktop */}
-        <div className="w-full lg:w-[320px] h-auto lg:h-full flex flex-col no-print z-10 shrink-0 overflow-y-auto custom-scrollbar">
+        {/* Sidebar - Fixed width on Desktop, but auto and tiled in print */}
+        <div className="w-full lg:w-[320px] h-auto lg:h-full flex flex-col z-10 shrink-0 overflow-y-auto custom-scrollbar print:overflow-visible print:h-auto">
           <ControlPanel 
             state={state} 
             onChange={(updates) => setState(prev => ({ ...prev, ...updates }))}
@@ -361,23 +361,23 @@ const App: React.FC = () => {
         </div>
         
         {/* Dashboard Grid - Scrollable on overflow */}
-        <div className="flex-1 h-full min-w-0 z-10 flex flex-col gap-3 lg:gap-1.5 overflow-y-auto custom-scrollbar pb-6 lg:pb-0">
+        <div className="flex-1 h-full min-w-0 z-10 flex flex-col gap-3 lg:gap-1.5 overflow-y-auto custom-scrollbar pb-6 lg:pb-0 print:overflow-visible print:h-auto">
             
             {/* Top Row (Cost, Staff, Opt) - Flex 4 */}
-            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-1.5 lg:flex-[4] min-h-[300px] lg:min-h-[200px]">
-                <div className="h-[300px] lg:h-full"><CostComparisonChart data={costTrendData} showComparison={showComparison} isDarkMode={isDarkMode} /></div>
-                <div className="h-[300px] lg:h-full"><StaffingChart data={staffingData} isDarkMode={isDarkMode} /></div>
-                <div className="flex flex-col gap-3 lg:gap-1.5 h-auto lg:h-full lg:min-h-0">
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-1.5 lg:flex-[4] min-h-[300px] lg:min-h-[200px] print:flex-none">
+                <div className="h-[300px] lg:h-full print:h-[250px]"><CostComparisonChart data={costTrendData} showComparison={showComparison} isDarkMode={isDarkMode} /></div>
+                <div className="h-[300px] lg:h-full print:h-[250px]"><StaffingChart data={staffingData} isDarkMode={isDarkMode} /></div>
+                <div className="flex flex-col gap-3 lg:gap-1.5 h-auto lg:h-full lg:min-h-0 print:h-[250px]">
                     <div className="h-[200px] lg:flex-1 lg:min-h-0 relative"><EfficiencyGauge value={metrics.roi > 0 ? ((metrics.traditionalCost - metrics.aiModeCost) / metrics.traditionalCost * 100) : 0} isDarkMode={isDarkMode} /></div>
-                    <div className="shrink-0"><ROICalculationDetails metrics={metrics} state={state} /></div>
+                    <div className="shrink-0 print:flex-1"><ROICalculationDetails metrics={metrics} state={state} /></div>
                 </div>
             </div>
 
             {/* Middle Row (Volume, Savings, Optimization) - Flex 2.5 */}
-            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-1.5 lg:flex-[2.5] min-h-[250px] lg:min-h-[140px]">
-                <div className="h-[250px] lg:h-full"><VolumeChart data={workloadData} subtitle={showComparison ? "Target" : "Current"} isDarkMode={isDarkMode} /></div>
+            <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 lg:gap-1.5 lg:flex-[2.5] min-h-[250px] lg:min-h-[140px] print:flex-none">
+                <div className="h-[250px] lg:h-full print:h-[180px]"><VolumeChart data={workloadData} subtitle={showComparison ? "Target" : "Current"} isDarkMode={isDarkMode} /></div>
                 
-                <div className="h-[140px] lg:h-full apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group">
+                <div className="h-[140px] lg:h-full apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group print:h-[180px]">
                     <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl"></div>
                     <h3 className="text-zinc-400 text-[11px] font-semibold uppercase tracking-wide z-10 light:text-slate-500">年度节省 / Savings</h3>
                     <div className="z-10">
@@ -393,7 +393,7 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="h-[140px] lg:h-full apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group">
+                <div className="h-[140px] lg:h-full apple-glass rounded-2xl p-3 flex flex-col justify-between relative overflow-hidden group print:h-[180px]">
                       <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl"></div>
                     
                     {/* Header */}
@@ -453,19 +453,19 @@ const App: React.FC = () => {
             </div>
 
             {/* Bottom Row (Analysis) - Flex 2.5 */}
-            <div className="min-h-[300px] lg:min-h-[180px] lg:flex-[2.5] relative rounded-2xl border border-white/10 overflow-hidden flex flex-col lg:flex-row w-full light:border-blue-200 light:bg-white light:shadow-sm">
-                <div className="absolute inset-0 bg-black light:hidden">
+            <div className="min-h-[300px] lg:min-h-[180px] lg:flex-[2.5] relative rounded-2xl border border-white/10 overflow-hidden flex flex-col lg:flex-row w-full light:border-blue-200 light:bg-white light:shadow-sm print:flex-none print:h-auto print:block">
+                <div className="absolute inset-0 bg-black light:hidden print:hidden">
                     <div className="siri-gradient absolute inset-0 opacity-40"></div>
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-xl"></div>
                 </div>
                 
                 {/* Left Avatar Section - Responsive */}
-                <div className="w-full lg:w-[160px] h-[140px] lg:h-auto flex lg:flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-white/5 bg-white/5 shrink-0 relative z-10 gap-4 lg:gap-0 p-4 lg:p-0 light:bg-blue-50/50 light:border-blue-100">
+                <div className="w-full lg:w-[160px] h-[140px] lg:h-auto flex lg:flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-white/5 bg-white/5 shrink-0 relative z-10 gap-4 lg:gap-0 p-4 lg:p-0 light:bg-blue-50/50 light:border-blue-100 print:w-full print:h-auto print:flex-row print:justify-start print:p-4 print:border-b print:bg-white">
                      {/* Avatar Image - Tech Quantum Core */}
                      <div className="relative w-20 h-20 lg:w-24 lg:h-24 p-1 shrink-0">
                         <TechQuantumAvatar className="w-full h-full shadow-2xl shadow-cyan-500/20" isAnimating={isAnalyzing} />
                      </div>
-                     <div className="flex flex-col lg:items-center text-left lg:text-center lg:mt-3">
+                     <div className="flex flex-col lg:items-center text-left lg:text-center lg:mt-3 print:ml-4 print:mt-0 print:items-start">
                           <div className="text-white text-xs font-semibold leading-tight light:text-blue-900">ZENAVA AI<br/>价值ROI分析</div>
                           <div className="text-zinc-400 text-[9px] mt-1 light:text-slate-500">Gemini 2.5 Pro</div>
                      </div>
@@ -482,8 +482,8 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Right Content Section */}
-                <div className="flex-1 flex flex-col p-0 min-w-0 relative z-10 h-[300px] lg:h-auto">
-                    <div className="flex justify-between items-center px-4 py-2 border-b border-white/5 shrink-0 light:border-slate-100">
+                <div className="flex-1 flex flex-col p-0 min-w-0 relative z-10 h-[300px] lg:h-auto print:h-auto">
+                    <div className="flex justify-between items-center px-4 py-2 border-b border-white/5 shrink-0 light:border-slate-100 no-print">
                           <h3 className="text-zinc-300 text-[11px] font-medium tracking-wide light:text-slate-600">策略分析 / STRATEGIC INSIGHT</h3>
                           <button 
                             onClick={handleAnalyze}
@@ -495,14 +495,14 @@ const App: React.FC = () => {
                     </div>
                     
                     {/* KPI Summary Bar */}
-                    <div className="grid grid-cols-3 gap-2 px-4 py-3 border-b border-white/5 bg-white/5 backdrop-blur-sm light:bg-slate-50 light:border-slate-100">
+                    <div className="grid grid-cols-3 gap-2 px-4 py-3 border-b border-white/5 bg-white/5 backdrop-blur-sm light:bg-slate-50 light:border-slate-100 print:bg-transparent print:border-b print:border-gray-200">
                         <div className="space-y-0.5">
                              <div className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold light:text-slate-400">ROI</div>
                              <div className="text-base font-bold text-white leading-none light:text-blue-900">
                                  {metrics.roi.toFixed(0)}%
                              </div>
                         </div>
-                        <div className="space-y-0.5 border-l border-white/10 pl-3 light:border-slate-200">
+                        <div className="space-y-0.5 border-l border-white/10 pl-3 light:border-slate-200 print:border-gray-300">
                              <div className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold light:text-slate-400">Payback</div>
                              <div className="text-base font-bold text-blue-400 leading-none light:text-blue-600">
                                  {metrics.yearsToBreakeven < 1 
@@ -511,7 +511,7 @@ const App: React.FC = () => {
                                  }
                              </div>
                         </div>
-                        <div className="space-y-0.5 border-l border-white/10 pl-3 light:border-slate-200">
+                        <div className="space-y-0.5 border-l border-white/10 pl-3 light:border-slate-200 print:border-gray-300">
                              <div className="text-[8px] text-zinc-500 uppercase tracking-wider font-bold light:text-slate-400">Workload Lift</div>
                              <div className="text-base font-bold text-emerald-400 leading-none light:text-emerald-600">
                                  {(metrics.humanWorkloadReduction / 10000).toFixed(0)}<span className="text-[10px] ml-0.5 font-normal opacity-70">w</span>
@@ -519,7 +519,7 @@ const App: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar">
+                    <div className="flex-1 p-4 overflow-y-auto custom-scrollbar print:overflow-visible print:h-auto">
                         <TypewriterEffect text={analysis} speed={15} />
                     </div>
                 </div>

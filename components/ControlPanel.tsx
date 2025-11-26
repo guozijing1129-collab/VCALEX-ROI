@@ -1,4 +1,3 @@
-
 import React, { memo } from 'react';
 import { SimulationState, ScenarioType } from '../types';
 
@@ -191,7 +190,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="apple-glass rounded-2xl flex flex-col h-full overflow-hidden relative">
+    <div className="apple-glass rounded-2xl flex flex-col h-full overflow-hidden relative print:h-auto print:overflow-visible">
       
       {/* Panel Header */}
       <div className="px-3 pt-3 pb-2 shrink-0 border-b border-white/5 light:border-blue-200">
@@ -215,7 +214,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
         
         {/* iOS Segmented Control for Scenarios */}
-        <div className="grid grid-cols-3 p-0.5 bg-zinc-800/50 rounded-lg gap-0.5 z-30 relative light:bg-slate-200">
+        <div className="grid grid-cols-3 p-0.5 bg-zinc-800/50 rounded-lg gap-0.5 z-30 relative light:bg-slate-200 no-print">
           {[
             { type: ScenarioType.DAILY, label: '日常 Daily' },
             { type: ScenarioType.PEAK, label: '峰值 Peak' },
@@ -235,9 +234,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             </button>
           ))}
         </div>
+        {/* Print only scenario display */}
+        <div className="hidden print-only text-[9px] text-zinc-500 mt-1">
+           Scenario: <span className="font-bold uppercase ml-1">{scenario}</span>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-1 custom-scrollbar space-y-3 pb-4 relative z-10">
+      <div className="flex-1 overflow-y-auto px-3 py-1 custom-scrollbar space-y-3 pb-4 relative z-10 print:overflow-visible print:h-auto">
         
         {/* 1. Baseline */}
         <div className="space-y-0.5">
