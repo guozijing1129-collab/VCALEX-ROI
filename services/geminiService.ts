@@ -2,12 +2,23 @@
 import { GoogleGenAI } from "@google/genai";
 import { SimulationState, SimulationMetrics } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+function getGeminiClient(): GoogleGenAI | null {
+  const apiKey = process.env.API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return null;
+  }
+  return new GoogleGenAI({ apiKey });
+}
 
 export const analyzeSimulation = async (
   state: SimulationState,
   metrics: SimulationMetrics
 ): Promise<string> => {
+  const ai = getGeminiClient();
+  if (!ai) {
+    return "未配置 GEMINI_API_KEY。ROI 测算大屏可正常使用；配置密钥后可生成 ZENAVA 战略分析。";
+  }
+
   const effectiveSalary = state.avgSalary * (1 + (state.salaryAdjustment || 0) / 100);
 
   const prompt = `
